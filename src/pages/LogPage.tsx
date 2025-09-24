@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
 
 const LogPage: React.FC = () => {
@@ -12,13 +13,13 @@ const LogPage: React.FC = () => {
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6 px-4 pb-12 pt-6 md:px-6 md:pb-16 md:pt-12">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Trip Log</h1>
-        <button
-          type="button"
-          className="rounded-2xl bg-slate-600/40 px-6 py-3 font-semibold text-slate-100 transition-colors duration-150 hover:bg-slate-600/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+        <Button
+          variant="secondary"
+          className="py-3"
           onClick={() => navigate('/')}
         >
           Close
-        </button>
+        </Button>
       </div>
 
       <p className="text-base text-slate-300">Entries are stored on this device and ordered by most recent first.</p>

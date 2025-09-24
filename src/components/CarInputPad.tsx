@@ -1,4 +1,6 @@
 import React from 'react';
+import Button from './ui/Button';
+import FlowContainer from './ui/FlowContainer';
 
 interface CarInputPadProps {
   value: string;
@@ -24,16 +26,12 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
   const isFull = value.length === MAX_LENGTH;
 
   return (
-    <div className="flex w-full max-w-[440px] flex-col items-center gap-6 text-center">
+    <FlowContainer>
       <div className="flex w-full items-center justify-between gap-3">
         <h1>Log Train Car</h1>
-        <button
-          type="button"
-          className="rounded-full bg-blue-900/25 px-4 py-2 text-sm font-semibold text-blue-200 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-          onClick={onSeeLog}
-        >
+        <Button variant="pill" onClick={onSeeLog}>
           See log
-        </button>
+        </Button>
       </div>
 
       <p className="text-base text-slate-300">Tap the keypad to enter the 4-digit car number.</p>
@@ -53,49 +51,39 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
 
       <div className="grid w-full grid-cols-3 gap-4">
         {keypadDigits.map((digit) => (
-          <button
+          <Button
             key={digit}
-            type="button"
-            className="rounded-2xl bg-blue-900/25 py-5 text-2xl font-semibold text-sky-100 transition-colors duration-150 hover:bg-blue-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
+            variant="keypad"
             onClick={() => onDigit(digit)}
             disabled={value.length >= MAX_LENGTH}
           >
             {digit}
-          </button>
+          </Button>
         ))}
-        <button
-          type="button"
-          className="rounded-2xl bg-slate-600/40 py-5 text-2xl font-semibold text-slate-100 transition-colors duration-150 hover:bg-slate-600/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-          onClick={onReset}
-        >
+        <Button variant="keypadSecondary" onClick={onReset}>
           Clear
-        </button>
-        <button
-          type="button"
-          className="rounded-2xl bg-blue-900/25 py-5 text-2xl font-semibold text-sky-100 transition-colors duration-150 hover:bg-blue-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
+        </Button>
+        <Button
+          variant="keypad"
           onClick={() => onDigit('0')}
           disabled={value.length >= MAX_LENGTH}
         >
           0
-        </button>
-        <button
-          type="button"
-          className="rounded-2xl bg-slate-600/40 py-5 text-2xl font-semibold text-slate-100 transition-colors duration-150 hover:bg-slate-600/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-          onClick={onBackspace}
-        >
+        </Button>
+        <Button variant="keypadSecondary" onClick={onBackspace}>
           ⌫
-        </button>
+        </Button>
       </div>
 
-      <button
-        type="button"
-        className="w-full rounded-2xl bg-gradient-to-br from-teal-500 to-sky-500 px-6 py-4 text-lg font-semibold text-slate-900 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 md:w-4/5 md:self-center"
+      <Button
+        variant="primary"
+        className="md:w-4/5 md:self-center"
         onClick={onConfirm}
         disabled={!isFull}
       >
         {isFull ? 'Continue' : 'Enter 4 digits'}
-      </button>
-    </div>
+      </Button>
+    </FlowContainer>
   );
 };
 

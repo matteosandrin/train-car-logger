@@ -1,4 +1,6 @@
 import React from 'react';
+import Button from './ui/Button';
+import FlowContainer from './ui/FlowContainer';
 
 const LINES = [
   '1',
@@ -34,15 +36,11 @@ interface LinePickerProps {
 
 const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine }) => {
   return (
-    <div className="flex w-full max-w-[440px] flex-col items-center gap-6 text-center">
+    <FlowContainer>
       <div className="flex w-full items-center justify-between gap-3">
-        <button
-          type="button"
-          className="rounded-full bg-blue-900/25 px-4 py-2 text-sm font-semibold text-blue-200 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-          onClick={onBack}
-        >
+        <Button variant="pill" onClick={onBack}>
           ← Back
-        </button>
+        </Button>
         <h1 className="text-2xl font-semibold">Choose Line</h1>
         <span aria-hidden="true" className="invisible w-20">
           ← Back
@@ -65,7 +63,7 @@ const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine 
           </button>
         ))}
       </div>
-    </div>
+    </FlowContainer>
   );
 };
 

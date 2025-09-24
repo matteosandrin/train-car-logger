@@ -1,4 +1,6 @@
 import React from 'react';
+import Button from './ui/Button';
+import FlowContainer from './ui/FlowContainer';
 
 interface ConfirmationScreenProps {
   carNumber: string;
@@ -9,7 +11,7 @@ interface ConfirmationScreenProps {
 
 const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({ carNumber, line, onConfirm, onCancel }) => {
   return (
-    <div className="flex w-full max-w-[440px] flex-col items-center gap-6 text-center">
+    <FlowContainer>
       <div className="flex w-full max-w-[420px] flex-col items-center gap-6 rounded-3xl bg-slate-900/85 p-8 text-center shadow-glow-card">
         <h1 className="text-2xl font-semibold">Confirm Entry</h1>
         <p className="text-base text-slate-300">Make sure everything looks right before saving.</p>
@@ -24,23 +26,15 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({ carNumber, line
           </div>
         </div>
         <div className="flex w-full flex-col gap-3">
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-gradient-to-br from-teal-500 to-sky-500 px-6 py-4 text-lg font-semibold text-slate-900 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-            onClick={onConfirm}
-          >
+          <Button variant="primary" onClick={onConfirm}>
             Confirm
-          </button>
-          <button
-            type="button"
-            className="rounded-2xl bg-slate-600/40 px-6 py-4 font-semibold text-slate-100 transition-colors duration-150 hover:bg-slate-600/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-            onClick={onCancel}
-          >
+          </Button>
+          <Button variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </FlowContainer>
   );
 };
 
