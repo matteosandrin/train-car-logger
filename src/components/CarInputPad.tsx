@@ -28,7 +28,7 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
   return (
     <FlowContainer>
       <div className="flex w-full items-center justify-between gap-3">
-        <h1>Log Train Car</h1>
+        <h1 className="font-bold text-3xl">Log Train Car</h1>
         <Button variant="pill" onClick={onSeeLog}>
           See log
         </Button>

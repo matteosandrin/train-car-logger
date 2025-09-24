@@ -10,12 +10,11 @@ const LogPage: React.FC = () => {
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6 px-4 pb-12 pt-6 md:px-6 md:pb-16 md:pt-12">
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Trip Log</h1>
+        <h1 className="text-2xl font-semibold">Log</h1>
         <Button
-          variant="secondary"
-          className="py-3"
+          variant="pill"
           onClick={() => navigate('/')}
         >
           Close
