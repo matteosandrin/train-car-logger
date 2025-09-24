@@ -6,26 +6,26 @@ const LINES = [
   '1',
   '2',
   '3',
+  '7',
   '4',
   '5',
   '6',
-  '7',
-  'A',
-  'C',
-  'E',
-  'B',
-  'D',
-  'F',
-  'M',
-  'G',
-  'J',
-  'Z',
-  'L',
-  'N',
-  'Q',
-  'R',
-  'W',
-  'S'
+  'g',
+  'a',
+  'c',
+  'e',
+  'l',
+  'b',
+  'd',
+  'f',
+  'm',
+  'n',
+  'q',
+  'r',
+  'w',
+  'j',
+  'z',
+  's',
 ];
 
 interface LinePickerProps {
@@ -54,12 +54,10 @@ const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine 
           <button
             key={line}
             type="button"
-            className={`flex aspect-square w-full items-center justify-center rounded-full bg-blue-900/35 text-2xl font-bold text-slate-50 transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 ${
-              selectedLine === line ? 'bg-gradient-to-br from-amber-300 to-orange-500 text-slate-900' : ''
-            }`}
+            className={`flex aspect-square w-full items-center justify-center`}
             onClick={() => onSelect(line)}
           >
-            {line}
+            <img src={`/assets/${line}.svg`}/>
           </button>
         ))}
       </div>
