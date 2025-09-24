@@ -36,20 +36,20 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
 
       <p className="text-base text-slate-300">Tap the keypad to enter the 4-digit car number.</p>
 
-      <div className="flex justify-center gap-4 text-3xl tracking-[0.24em]" aria-label="car number">
+      <div className="flex justify-center gap-3 md:gap-4 text-3xl tracking-[0.24em]" aria-label="car number">
         {Array.from({ length: MAX_LENGTH }).map((_, index) => (
-          <span
+          <div
             key={index}
             className={`flex h-20 w-16 items-center justify-center rounded-2xl bg-slate-400/15 text-3xl font-semibold text-slate-400 transition-colors duration-150 ${
               index < value.length ? 'bg-sky-400/20 text-slate-50' : ''
             }`}
           >
-            {value[index] ?? '•'}
-          </span>
+            <div className="mr-[-0.5rem]">{value[index] ?? '•'}</div>
+          </div>
         ))}
       </div>
 
-      <div className="grid w-full grid-cols-3 gap-4">
+      <div className="grid w-full grid-cols-3 gap-3 md:gap-4">
         {keypadDigits.map((digit) => (
           <Button
             key={digit}
