@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from './ui/Button';
 import FlowContainer from './ui/FlowContainer';
+import { assetUrl } from '../lib/assets';
 
 interface ConfirmationScreenProps {
   carNumber: string;
@@ -22,7 +23,10 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({ carNumber, line
         </div>
         <div className="flex flex-col items-center">
           <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 w-full text-center">Line</span>
-          <img className="mt-2 w-20 h-20" src={`/assets/${line}.svg`}/>
+          <img
+            className="mt-2 w-20 h-20"
+            src={assetUrl(`assets/${line}.svg`)}
+          />
         </div>
       </div>
       <div className="flex w-full flex-col gap-3">

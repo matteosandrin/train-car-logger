@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from './ui/Button';
 import FlowContainer from './ui/FlowContainer';
+import { assetUrl } from '../lib/assets';
 
 const LINES = [
   '1',
@@ -57,7 +58,7 @@ const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine 
             className="flex aspect-square w-full items-center justify-center"
             onClick={() => onSelect(line)}
           >
-            <img src={`/assets/${line}.svg`} />
+            <img src={assetUrl(`assets/${line}.svg`)} />
           </button>
         ))}
       </div>
