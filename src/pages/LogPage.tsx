@@ -24,7 +24,7 @@ const LogPage: React.FC = () => {
       <p className="text-base text-slate-300">Entries are stored on this device and ordered by most recent first.</p>
 
       {sortedLogs.length === 0 ? (
-        <p className="text-center text-slate-300">No trips yet. Log your first train car!</p>
+        <p className="text-slate-300">No trips yet. Log your first train car!</p>
       ) : (
         <div className="overflow-x-auto rounded-2xl bg-slate-900/80 ring-1 ring-slate-400/20">
           <table className="min-w-full table-auto text-left">
@@ -39,7 +39,7 @@ const LogPage: React.FC = () => {
               {sortedLogs.map((entry) => (
                 <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-600/20">
                   <td className="px-6 py-4 text-base text-slate-100">
-                    {new Date(entry.timestamp * 1000).toLocaleString()}
+                    {new Date(entry.timestamp).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 text-base text-slate-100">{entry.car}</td>
                   <td className="px-6 py-4 text-base text-slate-100">{entry.line}</td>

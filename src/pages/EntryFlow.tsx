@@ -49,7 +49,7 @@ const EntryFlow: React.FC = () => {
       return;
     }
 
-    addLog(Number(carNumber), line);
+    addLog(carNumber, line);
     resetFlow();
   };
 

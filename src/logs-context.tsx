@@ -3,7 +3,7 @@ import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from './storage';
 
 interface LogsContextValue {
   logs: TrainLogEntry[];
-  addLog: (car: number, line: string, timestamp?: number) => void;
+  addLog: (car: string, line: string, timestamp?: number) => void;
 }
 
 const LogsContext = createContext<LogsContextValue | undefined>(undefined);
@@ -11,12 +11,12 @@ const LogsContext = createContext<LogsContextValue | undefined>(undefined);
 export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [logs, setLogs] = useState<TrainLogEntry[]>(() => loadLogs());
 
-  const addLog = useCallback((car: number, line: string, timestamp?: number) => {
+  const addLog = useCallback((car: string, line: string, timestamp?: number) => {
     setLogs((prev) => {
       const nextEntry: TrainLogEntry = {
         car,
         line,
-        timestamp: timestamp ?? Math.floor(Date.now() / 1000),
+        timestamp: timestamp ?? Math.floor(Date.now()),
       };
       const nextLogs = [...prev, nextEntry];
       saveLogs(nextLogs);

@@ -1,6 +1,6 @@
 export interface TrainLogEntry {
   timestamp: number;
-  car: number;
+  car: string;
   line: string;
 }
 
