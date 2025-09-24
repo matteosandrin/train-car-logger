@@ -12,7 +12,7 @@ const focusRingClasses =
 const variantClasses: Record<ButtonVariant, string> = {
   pill: 'rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition-all duration-150 md:hover:-translate-y-0.5 md:hover:bg-sky-200',
   primary:
-    'w-full rounded-2xl bg-gradient-to-br from-sky-400 via-indigo-400 to-indigo-500 px-6 py-4 text-lg font-semibold text-white shadow-md transition-transform duration-150 md:hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60',
+    'w-full rounded-2xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white shadow-md transition-colors duration-150 md:hover:bg-blue-700 active:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60',
   secondary:
     'rounded-2xl bg-white px-6 py-4 font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 md:hover:bg-slate-50 active:bg-slate-100',
   keypad:

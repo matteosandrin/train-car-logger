@@ -75,7 +75,6 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
 
       <Button
         variant="primary"
-        className="md:w-4/5 md:self-center"
         onClick={onConfirm}
         disabled={!isFull}
       >
