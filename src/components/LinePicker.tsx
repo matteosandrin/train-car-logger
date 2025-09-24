@@ -47,17 +47,17 @@ const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine 
         </span>
       </div>
 
-      <p className="text-base text-slate-300">Pick the line you rode on.</p>
+      <p className="text-base text-slate-600">Pick the line you rode on.</p>
 
       <div className="grid w-full grid-cols-[repeat(auto-fit,_minmax(72px,_1fr))] gap-4">
         {LINES.map((line) => (
           <button
             key={line}
             type="button"
-            className={`flex aspect-square w-full items-center justify-center`}
+            className="flex aspect-square w-full items-center justify-center"
             onClick={() => onSelect(line)}
           >
-            <img src={`/assets/${line}.svg`}/>
+            <img src={`/assets/${line}.svg`} />
           </button>
         ))}
       </div>

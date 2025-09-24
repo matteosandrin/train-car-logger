@@ -21,28 +21,28 @@ const LogPage: React.FC = () => {
         </Button>
       </div>
 
-      <p className="text-base text-slate-300">Entries are stored on this device and ordered by most recent first.</p>
+      <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
 
       {sortedLogs.length === 0 ? (
-        <p className="text-slate-300">No trips yet. Log your first train car!</p>
+        <p className="text-slate-600">No trips yet. Log your first train car!</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl bg-slate-900/80 ring-1 ring-slate-400/20">
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <table className="min-w-full table-auto text-left">
-            <thead className="bg-blue-900/35">
+            <thead className="bg-slate-200">
               <tr>
-                <th className="px-6 py-4 text-base font-semibold text-slate-100">Timestamp</th>
-                <th className="px-6 py-4 text-base font-semibold text-slate-100">Car</th>
-                <th className="px-6 py-4 text-base font-semibold text-slate-100">Line</th>
+                <th className="px-6 py-4 text-base font-semibold text-slate-600">Timestamp</th>
+                <th className="px-6 py-4 text-base font-semibold text-slate-600">Car</th>
+                <th className="px-6 py-4 text-base font-semibold text-slate-600">Line</th>
               </tr>
             </thead>
             <tbody>
               {sortedLogs.map((entry) => (
-                <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-600/20">
-                  <td className="px-6 py-4 text-base text-slate-100">
+                <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-50">
+                  <td className="px-6 py-4 text-base text-slate-700">
                     {new Date(entry.timestamp).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-base text-slate-100">{entry.car}</td>
-                  <td className="px-6 py-4 text-base text-slate-100">{entry.line}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{entry.car}</td>
+                  <td className="px-6 py-4 text-base text-slate-700">{entry.line}</td>
                 </tr>
               ))}
             </tbody>
