@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
+import { assetUrl } from '../assets';
 
 const LogPage: React.FC = () => {
   const { logs } = useLogsContext();
@@ -30,21 +31,24 @@ const LogPage: React.FC = () => {
           <table className="min-w-full table-auto text-left">
             <thead className="bg-slate-200">
               <tr>
-                <th className="px-6 py-4 text-base font-semibold text-slate-600">Timestamp</th>
-                <th className="px-6 py-4 text-base font-semibold text-slate-600">Car</th>
-                <th className="px-6 py-4 text-base font-semibold text-slate-600">Line</th>
+                { ["Date", "Car", "Line"].map(header => (
+                  <th className="px-3 py-2 md:px-6 md:py-4 text-base font-semibold text-slate-600">{header}</th>
+                )) }
               </tr>
             </thead>
             <tbody>
-              {sortedLogs.map((entry) => (
-                <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-50">
-                  <td className="px-6 py-4 text-base text-slate-700">
-                    {new Date(entry.timestamp).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-base text-slate-700">{entry.car}</td>
-                  <td className="px-6 py-4 text-base text-slate-700">{entry.line}</td>
-                </tr>
-              ))}
+              {sortedLogs.map((entry) => {
+                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-base text-slate-700";
+                return (
+                  <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-50">
+                    <td className={rowClasses}>
+                      {new Date(entry.timestamp).toLocaleString()}
+                    </td>
+                    <td className={rowClasses}>{entry.car}</td>
+                    <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
