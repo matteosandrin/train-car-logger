@@ -50,7 +50,7 @@ const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine 
 
       <p className="text-base text-slate-600">Pick the line you rode on.</p>
 
-      <div className="grid w-full grid-cols-[repeat(auto-fit,_minmax(72px,_1fr))] gap-4">
+      <div className="grid w-full grid-cols-4 gap-4">
         {LINES.map((line) => (
           <button
             key={line}
