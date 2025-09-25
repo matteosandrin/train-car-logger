@@ -6,6 +6,6 @@
   "scope": "/train-car-logger/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#1e293b"
+  "background_color": "#f1f5f9",
+  "theme_color": "#f1f5f9"
 }
