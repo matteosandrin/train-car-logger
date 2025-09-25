@@ -5,10 +5,17 @@ import { useLogsContext } from '../logs-context';
 import { assetUrl } from '../assets';
 
 const LogPage: React.FC = () => {
-  const { logs } = useLogsContext();
+  const { logs, removeLog } = useLogsContext();
   const navigate = useNavigate();
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number]) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      removeLog(entry);
+    }
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
@@ -32,7 +39,7 @@ const LogPage: React.FC = () => {
             <thead className="bg-slate-200">
               <tr>
                 { ["Date", "Car", "Line"].map(header => (
-                  <th className="px-3 py-2 md:px-6 md:py-4 text-base font-semibold text-slate-600">{header}</th>
+                  <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
                 )) }
               </tr>
             </thead>
@@ -40,7 +47,14 @@ const LogPage: React.FC = () => {
               {sortedLogs.map((entry) => {
                 const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-base text-slate-700";
                 return (
-                  <tr key={`${entry.timestamp}-${entry.car}-${entry.line}`} className="even:bg-slate-50">
+                  <tr
+                    key={`${entry.timestamp}-${entry.car}-${entry.line}`}
+                    className="even:bg-slate-50 cursor-pointer transition-colors md:hover:bg-rose-100 md:focus-visible:bg-rose-100"
+                    onClick={() => removeLog(entry)}
+                    onKeyDown={(event) => handleKeyDown(event, entry)}
+                    role="button"
+                    tabIndex={0}
+                  >
                     <td className={rowClasses}>
                       {new Date(entry.timestamp).toLocaleString()}
                     </td>

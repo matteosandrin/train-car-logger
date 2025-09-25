@@ -4,6 +4,7 @@ import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from './storage';
 interface LogsContextValue {
   logs: TrainLogEntry[];
   addLog: (car: string, line: string, timestamp?: number) => void;
+  removeLog: (entry: TrainLogEntry) => void;
 }
 
 const LogsContext = createContext<LogsContextValue | undefined>(undefined);
@@ -24,6 +25,29 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     });
   }, []);
 
+  const removeLog = useCallback((entryToRemove: TrainLogEntry) => {
+    setLogs((prev) => {
+      let didRemove = false;
+      const nextLogs = prev.filter((entry) => {
+        const isMatch =
+          entry.timestamp === entryToRemove.timestamp &&
+          entry.car === entryToRemove.car &&
+          entry.line === entryToRemove.line;
+        if (isMatch) {
+          didRemove = true;
+        }
+        return !isMatch;
+      });
+
+      if (!didRemove) {
+        return prev;
+      }
+
+      saveLogs(nextLogs);
+      return nextLogs;
+    });
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -39,7 +63,7 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const value = useMemo(() => ({ logs, addLog }), [logs, addLog]);
+  const value = useMemo(() => ({ logs, addLog, removeLog }), [logs, addLog, removeLog]);
 
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 };
