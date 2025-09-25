@@ -52,16 +52,48 @@ const LogPage: React.FC = () => {
     startTimer(entryId, () => removeLog(entry));
   }, [removeLog, startTimer]);
 
+  const handleExport = useCallback(() => {
+    if (sortedLogs.length === 0) {
+      return;
+    }
+
+    const timestamp = new Date();
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    const fileName = `train-car-log-${timestamp.getFullYear()}${pad(timestamp.getMonth() + 1)}${pad(timestamp.getDate())}-${pad(timestamp.getHours())}${pad(timestamp.getMinutes())}${pad(timestamp.getSeconds())}.json`;
+
+    const blob = new Blob([JSON.stringify(sortedLogs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.rel = 'noopener';
+    link.click();
+
+    window.setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }, [sortedLogs]);
+
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Log</h1>
-        <Button
-          variant="pill"
-          onClick={() => navigate('/')}
-        >
-          Close
-        </Button>
+        <div className="flex items-center gap-3">
+          {sortedLogs.length > 0 && <Button
+            variant="pill"
+            onClick={handleExport}
+            disabled={sortedLogs.length === 0}
+          >
+            Export JSON
+          </Button>}
+          <Button
+            variant="pill"
+            onClick={() => navigate('/')}
+          >
+            Close
+          </Button>
+        </div>
       </div>
 
       <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
