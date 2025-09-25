@@ -1,0 +1,11 @@
+{
+  "name": "Train Car Logger",
+  "short_name": "Train Log",
+  "description": "Log and manage train cars on the go.",
+  "start_url": "/train-car-logger/",
+  "scope": "/train-car-logger/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f5f9",
+  "theme_color": "#f1f5f9"
+}
