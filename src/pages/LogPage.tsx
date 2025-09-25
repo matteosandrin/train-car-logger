@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
 import { assetUrl } from '../assets';
+
+const LONG_PRESS_DELAY_MS = 1000;
 
 const LogPage: React.FC = () => {
   const { logs, removeLog } = useLogsContext();
@@ -10,12 +12,45 @@ const LogPage: React.FC = () => {
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number]) => {
+  const timersRef = useRef<Map<string, number>>(new Map());
+
+  const cancelTimer = useCallback((id: string) => {
+    const timeoutId = timersRef.current.get(id);
+    if (timeoutId !== undefined) {
+      window.clearTimeout(timeoutId);
+      timersRef.current.delete(id);
+    }
+  }, []);
+
+  const startTimer = useCallback((id: string, action: () => void) => {
+    cancelTimer(id);
+    const timeoutId = window.setTimeout(() => {
+      timersRef.current.delete(id);
+      action();
+    }, LONG_PRESS_DELAY_MS);
+    timersRef.current.set(id, timeoutId);
+  }, [cancelTimer]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number], entryId: string) => {
+    if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+      event.preventDefault();
+      startTimer(entryId, () => removeLog(entry));
+    }
+  }, [removeLog, startTimer]);
+
+  const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLTableRowElement>, entryId: string) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      removeLog(entry);
+      cancelTimer(entryId);
     }
-  };
+  }, [cancelTimer]);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number], entryId: string) => {
+    if (event.button !== 0) {
+      return;
+    }
+    startTimer(entryId, () => removeLog(entry));
+  }, [removeLog, startTimer]);
 
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
@@ -30,6 +65,7 @@ const LogPage: React.FC = () => {
       </div>
 
       <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
+      <p className="text-base text-slate-600">Long press to delete a row.</p>
 
       {sortedLogs.length === 0 ? (
         <p className="text-slate-600">No trips yet. Log your first train car!</p>
@@ -46,14 +82,20 @@ const LogPage: React.FC = () => {
             <tbody>
               {sortedLogs.map((entry) => {
                 const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-base text-slate-700";
+                const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
                 return (
                   <tr
-                    key={`${entry.timestamp}-${entry.car}-${entry.line}`}
+                    key={entryId}
                     className="even:bg-slate-50 cursor-pointer transition-colors md:hover:bg-rose-100 md:focus-visible:bg-rose-100"
-                    onClick={() => removeLog(entry)}
-                    onKeyDown={(event) => handleKeyDown(event, entry)}
                     role="button"
                     tabIndex={0}
+                    onPointerDown={(event) => handlePointerDown(event, entry, entryId)}
+                    onPointerUp={() => cancelTimer(entryId)}
+                    onPointerLeave={() => cancelTimer(entryId)}
+                    onPointerCancel={() => cancelTimer(entryId)}
+                    onKeyDown={(event) => handleKeyDown(event, entry, entryId)}
+                    onKeyUp={(event) => handleKeyUp(event, entryId)}
+                    onBlur={() => cancelTimer(entryId)}
                   >
                     <td className={rowClasses}>
                       {new Date(entry.timestamp).toLocaleString()}
