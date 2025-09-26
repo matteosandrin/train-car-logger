@@ -51,6 +51,7 @@ const EntryFlow: React.FC = () => {
 
     addLog(carNumber, line);
     resetFlow();
+    navigate('/log');
   };
 
   const handleCancel = () => {

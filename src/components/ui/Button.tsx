@@ -10,7 +10,7 @@ const focusRingClasses =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400';
 
 const variantClasses: Record<ButtonVariant, string> = {
-  pill: 'rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition-all duration-150 md:hover:-translate-y-0.5 md:hover:bg-sky-200',
+  pill: 'rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition-all duration-150 md:hover:bg-sky-200',
   primary:
     'w-full rounded-2xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white shadow-md transition-colors duration-150 md:hover:bg-blue-700 active:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60',
   secondary:

@@ -12,6 +12,26 @@ const LogPage: React.FC = () => {
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
+  const { totalLoggedCars, repeatCars } = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const entry of logs) {
+      counts.set(entry.car, (counts.get(entry.car) ?? 0) + 1);
+    }
+
+    let repeated: string[] = [];
+    counts.forEach((count: number, car: string) => {
+      if (count > 1) {
+        repeated.push(car);
+      }
+    });
+
+    return {
+      totalLoggedCars: logs.length,
+      repeatCars: repeated,
+    };
+  }, [logs]);
+
   const timersRef = useRef<Map<string, number>>(new Map());
 
   const cancelTimer = useCallback((id: string) => {
@@ -98,6 +118,17 @@ const LogPage: React.FC = () => {
 
       <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
       <p className="text-base text-slate-600">Long press to delete a row.</p>
+
+      <div className="grid gap-4 grid-cols-2">
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-medium text-slate-500">TOTAL CARS</p>
+          <p className="text-3xl font-semibold text-slate-900">{totalLoggedCars}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-medium text-slate-500">REPEAT CARS</p>
+          <p className="text-3xl font-semibold text-slate-900">{repeatCars.length > 0 ? repeatCars.join(', ') : '–'}</p>
+        </div>
+      </div>
 
       {sortedLogs.length === 0 ? (
         <p className="text-slate-600">No trips yet. Log your first train car!</p>
