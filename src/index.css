@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.text-unselectable {
+    user-select: none;
+    -webkit-user-select: none;
+}

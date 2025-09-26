@@ -149,7 +149,7 @@ const LogPage: React.FC = () => {
                 return (
                   <tr
                     key={entryId}
-                    className="even:bg-slate-50 cursor-pointer transition-colors md:hover:bg-rose-100 md:focus-visible:bg-rose-100"
+                    className="even:bg-slate-50 cursor-pointer text-unselectable transition-colors md:hover:bg-rose-100 md:focus-visible:bg-rose-100"
                     role="button"
                     tabIndex={0}
                     onPointerDown={(event) => handlePointerDown(event, entry, entryId)}
