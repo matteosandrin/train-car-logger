@@ -1,14 +1,21 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
 import { assetUrl } from '../assets';
+import ConfettiExplosion from '../components/ConfettiExplosion';
 
 const LONG_PRESS_DELAY_MS = 1000;
+
+type LogLocationState = {
+  fromNewEntry?: boolean;
+};
 
 const LogPage: React.FC = () => {
   const { logs, removeLog } = useLogsContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
@@ -33,6 +40,25 @@ const LogPage: React.FC = () => {
   }, [logs]);
 
   const timersRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    const locationState = location.state as LogLocationState | undefined;
+
+    if (!locationState?.fromNewEntry) {
+      return;
+    }
+
+    setShowConfetti(true);
+
+    const timer = window.setTimeout(() => {
+      setShowConfetti(false);
+    }, 2600);
+
+    const clearedPath = `${location.pathname}${location.search}${location.hash}`;
+    navigate(clearedPath, { replace: true });
+
+    return () => window.clearTimeout(timer);
+  }, [location, navigate]);
 
   const cancelTimer = useCallback((id: string) => {
     const timeoutId = timersRef.current.get(id);
@@ -97,6 +123,7 @@ const LogPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
+      {showConfetti && <ConfettiExplosion onComplete={() => setShowConfetti(false)} />}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Log</h1>
         <div className="flex items-center gap-3">
