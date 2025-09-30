@@ -197,7 +197,7 @@ const LogPage: React.FC = () => {
                     onMouseLeave={() => handleSwipeEnd(entry, entryId)}
                   >
                     <td className={rowClasses}>
-                      {new Date(entry.timestamp).toISOString().replace("T", " ").slice(0, 19)}
+                      {new Date(entry.timestamp).toLocaleString()}
                     </td>
                     <td className={rowClasses}>{entry.car}</td>
                     <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
