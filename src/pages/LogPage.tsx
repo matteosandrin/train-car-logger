@@ -1,14 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
 import { assetUrl } from '../assets';
 import ConfettiExplosion from '../components/ConfettiExplosion';
 
-const LONG_PRESS_DELAY_MS = 1000;
-
 type LogLocationState = {
   fromNewEntry?: boolean;
+};
+
+type SwipeState = {
+  startX: number;
+  currentX: number;
+  isDragging: boolean;
 };
 
 const LogPage: React.FC = () => {
@@ -16,6 +20,7 @@ const LogPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showConfetti, setShowConfetti] = useState(false);
+  const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(new Map());
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
@@ -39,8 +44,6 @@ const LogPage: React.FC = () => {
     };
   }, [logs]);
 
-  const timersRef = useRef<Map<string, number>>(new Map());
-
   useEffect(() => {
     const locationState = location.state as LogLocationState | undefined;
 
@@ -60,43 +63,44 @@ const LogPage: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [location, navigate]);
 
-  const cancelTimer = useCallback((id: string) => {
-    const timeoutId = timersRef.current.get(id);
-    if (timeoutId !== undefined) {
-      window.clearTimeout(timeoutId);
-      timersRef.current.delete(id);
-    }
+  const handleSwipeStart = useCallback((event: React.TouchEvent | React.MouseEvent, entryId: string) => {
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    setSwipeStates(prev => new Map(prev.set(entryId, {
+      startX: clientX,
+      currentX: clientX,
+      isDragging: true
+    })));
   }, []);
 
-  const startTimer = useCallback((id: string, action: () => void) => {
-    cancelTimer(id);
-    const timeoutId = window.setTimeout(() => {
-      timersRef.current.delete(id);
-      action();
-    }, LONG_PRESS_DELAY_MS);
-    timersRef.current.set(id, timeoutId);
-  }, [cancelTimer]);
+  const handleSwipeMove = useCallback((event: React.TouchEvent | React.MouseEvent, entryId: string) => {
+    const swipeState = swipeStates.get(entryId);
+    if (!swipeState?.isDragging) return;
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number], entryId: string) => {
-    if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
-      event.preventDefault();
-      startTimer(entryId, () => removeLog(entry));
-    }
-  }, [removeLog, startTimer]);
+    event.preventDefault();
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    setSwipeStates(prev => new Map(prev.set(entryId, {
+      ...swipeState,
+      currentX: clientX
+    })));
+  }, [swipeStates]);
 
-  const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLTableRowElement>, entryId: string) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      cancelTimer(entryId);
-    }
-  }, [cancelTimer]);
+  const handleSwipeEnd = useCallback((entry: typeof sortedLogs[number], entryId: string) => {
+    const swipeState = swipeStates.get(entryId);
+    if (!swipeState?.isDragging) return;
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLTableRowElement>, entry: typeof sortedLogs[number], entryId: string) => {
-    if (event.button !== 0) {
-      return;
+    const swipeDistance = swipeState.startX - swipeState.currentX;
+    const deleteThreshold = 150;
+
+    if (swipeDistance > deleteThreshold) {
+      removeLog(entry);
     }
-    startTimer(entryId, () => removeLog(entry));
-  }, [removeLog, startTimer]);
+
+    setSwipeStates(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(entryId);
+      return newMap;
+    });
+  }, [swipeStates, removeLog]);
 
   const handleExport = useCallback(() => {
     if (sortedLogs.length === 0) {
@@ -144,7 +148,7 @@ const LogPage: React.FC = () => {
       </div>
 
       <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
-      <p className="text-base text-slate-600">Long press to delete a row.</p>
+      <p className="text-base text-slate-600">Swipe left to delete a row.</p>
 
       <div className="grid gap-4 grid-cols-2">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -173,19 +177,27 @@ const LogPage: React.FC = () => {
               {sortedLogs.map((entry) => {
                 const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-base text-slate-700";
                 const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
+                const swipeState = swipeStates.get(entryId);
+                const swipeOffset = swipeState ? Math.min(0, swipeState.currentX - swipeState.startX) : 0;
+                const swipeProgress = Math.min(1, Math.abs(swipeOffset) / 150);
+                const showDeleteIcon = swipeOffset < -30;
+                const willDelete = swipeOffset < -150;
+
                 return (
                   <tr
                     key={entryId}
-                    className="even:bg-slate-50 cursor-pointer text-unselectable transition-colors md:hover:bg-rose-100 md:focus-visible:bg-rose-100"
-                    role="button"
-                    tabIndex={0}
-                    onPointerDown={(event) => handlePointerDown(event, entry, entryId)}
-                    onPointerUp={() => cancelTimer(entryId)}
-                    onPointerLeave={() => cancelTimer(entryId)}
-                    onPointerCancel={() => cancelTimer(entryId)}
-                    onKeyDown={(event) => handleKeyDown(event, entry, entryId)}
-                    onKeyUp={(event) => handleKeyUp(event, entryId)}
-                    onBlur={() => cancelTimer(entryId)}
+                    className={`even:bg-slate-50 transition-colors relative overflow-hidden ${willDelete ? 'bg-red-100' : ''}`}
+                    style={{
+                      transform: `translateX(${swipeOffset}px)`,
+                      transition: swipeState?.isDragging ? 'none' : 'transform 0.3s ease-out'
+                    }}
+                    onTouchStart={(event) => handleSwipeStart(event, entryId)}
+                    onTouchMove={(event) => handleSwipeMove(event, entryId)}
+                    onTouchEnd={() => handleSwipeEnd(entry, entryId)}
+                    onMouseDown={(event) => handleSwipeStart(event, entryId)}
+                    onMouseMove={(event) => handleSwipeMove(event, entryId)}
+                    onMouseUp={() => handleSwipeEnd(entry, entryId)}
+                    onMouseLeave={() => handleSwipeEnd(entry, entryId)}
                   >
                     <td className={rowClasses}>
                       {new Date(entry.timestamp).toLocaleString()}
