@@ -175,18 +175,15 @@ const LogPage: React.FC = () => {
             </thead>
             <tbody>
               {sortedLogs.map((entry) => {
-                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-base text-slate-700";
+                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
                 const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
                 const swipeState = swipeStates.get(entryId);
                 const swipeOffset = swipeState ? Math.min(0, swipeState.currentX - swipeState.startX) : 0;
-                const swipeProgress = Math.min(1, Math.abs(swipeOffset) / 150);
-                const showDeleteIcon = swipeOffset < -30;
-                const willDelete = swipeOffset < -150;
 
                 return (
                   <tr
                     key={entryId}
-                    className={`even:bg-slate-50 transition-colors relative overflow-hidden ${willDelete ? 'bg-red-100' : ''}`}
+                    className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
                     style={{
                       transform: `translateX(${swipeOffset}px)`,
                       transition: swipeState?.isDragging ? 'none' : 'transform 0.3s ease-out'
@@ -200,7 +197,7 @@ const LogPage: React.FC = () => {
                     onMouseLeave={() => handleSwipeEnd(entry, entryId)}
                   >
                     <td className={rowClasses}>
-                      {new Date(entry.timestamp).toLocaleString()}
+                      {new Date(entry.timestamp).toISOString().replace("T", " ").slice(0, 19)}
                     </td>
                     <td className={rowClasses}>{entry.car}</td>
                     <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
