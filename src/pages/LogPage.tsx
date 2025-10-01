@@ -193,7 +193,7 @@ const LogPage: React.FC = () => {
             </thead>
             <tbody>
               {leaderboard.map((item, index) => {
-                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-base text-slate-700 font-mono w-1/3";
+                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono w-1/3";
                 return (
                   <tr key={item.car} className="even:bg-slate-50">
                     <td className={rowClasses}>#{index + 1}</td>
