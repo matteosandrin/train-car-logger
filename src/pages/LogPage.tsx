@@ -24,23 +24,43 @@ const LogPage: React.FC = () => {
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
-  const { totalLoggedCars, repeatCars } = useMemo(() => {
+  const { totalLoggedCars, repeatCars, leaderboard } = useMemo(() => {
     const counts = new Map<string, number>();
+    const latestTimestamps = new Map<string, number>();
 
     for (const entry of logs) {
       counts.set(entry.car, (counts.get(entry.car) ?? 0) + 1);
+      const currentLatest = latestTimestamps.get(entry.car) ?? 0;
+      if (entry.timestamp > currentLatest) {
+        latestTimestamps.set(entry.car, entry.timestamp);
+      }
     }
 
     let repeated: string[] = [];
+    const leaderboardData: Array<{ car: string; count: number; latestTimestamp: number }> = [];
+
     counts.forEach((count: number, car: string) => {
       if (count > 1) {
         repeated.push(car);
+        leaderboardData.push({
+          car,
+          count,
+          latestTimestamp: latestTimestamps.get(car) ?? 0
+        });
       }
+    });
+
+    leaderboardData.sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return b.latestTimestamp - a.latestTimestamp;
     });
 
     return {
       totalLoggedCars: logs.length,
       repeatCars: repeated,
+      leaderboard: leaderboardData,
     };
   }, [logs]);
 
@@ -150,23 +170,49 @@ const LogPage: React.FC = () => {
       <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
       <p className="text-base text-slate-600">Swipe left to delete a row.</p>
 
-      <div className="grid gap-4 grid-cols-2">
+      <div className="grid gap-4 grid-cols-2 text-center">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-medium text-slate-500">TOTAL CARS</p>
           <p className="text-3xl font-semibold text-slate-900">{totalLoggedCars}</p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-medium text-slate-500">REPEAT CARS</p>
-          <p className="text-3xl font-semibold text-slate-900">{repeatCars.length > 0 ? repeatCars.join(', ') : '–'}</p>
+          <p className="text-3xl font-semibold text-slate-900">{repeatCars.length > 0 ? repeatCars.length : '–'}</p>
         </div>
       </div>
+
+      {leaderboard.length > 0 && (
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+          <table className="min-w-full table-auto text-left">
+            <thead className="bg-slate-100">
+              <tr>
+                {["Rank", "Car", "Count"].map(header => (
+                  <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((item, index) => {
+                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-base text-slate-700 font-mono w-1/3";
+                return (
+                  <tr key={item.car} className="even:bg-slate-50">
+                    <td className={rowClasses}>#{index + 1}</td>
+                    <td className={rowClasses}>{item.car}</td>
+                    <td className={rowClasses}>{item.count}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {sortedLogs.length === 0 ? (
         <p className="text-slate-600">No trips yet. Log your first train car!</p>
       ) : (
         <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <table className="min-w-full table-auto text-left">
-            <thead className="bg-slate-200">
+            <thead className="bg-slate-100">
               <tr>
                 { ["Date", "Car", "Line"].map(header => (
                   <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
