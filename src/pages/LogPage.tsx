@@ -166,9 +166,10 @@ const LogPage: React.FC = () => {
           </Button>
         </div>
       </div>
-
-      <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
-      <p className="text-base text-slate-600">Swipe left to delete a row.</p>
+      <div>
+        <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
+        <p className="text-base text-slate-600 mt-2">Swipe left to delete a row.</p>
+      </div>
 
       <div className="grid gap-4 grid-cols-2 text-center">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
