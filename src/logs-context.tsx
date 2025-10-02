@@ -5,6 +5,7 @@ interface LogsContextValue {
   logs: TrainLogEntry[];
   addLog: (car: string, line: string, timestamp?: number) => void;
   removeLog: (entry: TrainLogEntry) => void;
+  getCarCount: (car: string) => number;
 }
 
 const LogsContext = createContext<LogsContextValue | undefined>(undefined);
@@ -48,6 +49,11 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     });
   }, []);
 
+  const getCarCount = useCallback((car: string): number => {
+    const newLogs = loadLogs();
+    return newLogs.filter(entry => entry.car === car).length;
+  }, [loadLogs]);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -63,7 +69,7 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const value = useMemo(() => ({ logs, addLog, removeLog }), [logs, addLog, removeLog]);
+  const value = useMemo(() => ({ logs, addLog, removeLog, getCarCount }), [logs, addLog, removeLog, getCarCount]);
 
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 };

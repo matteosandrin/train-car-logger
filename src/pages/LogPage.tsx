@@ -4,9 +4,11 @@ import Button from '../components/ui/Button';
 import { useLogsContext } from '../logs-context';
 import { assetUrl } from '../assets';
 import ConfettiExplosion from '../components/ConfettiExplosion';
+import RepeatExplosion from '../components/RepeatExplosion';
 
 type LogLocationState = {
   fromNewEntry?: boolean;
+  repeat: number;
 };
 
 type SwipeState = {
@@ -20,6 +22,8 @@ const LogPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showRepeatExplosion, setShowRepeatExplosion] = useState(false);
+  const [repeatNum, setRepeatNum] = useState(0);
   const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(new Map());
 
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
@@ -69,6 +73,17 @@ const LogPage: React.FC = () => {
 
     if (!locationState?.fromNewEntry) {
       return;
+    }
+
+    if (locationState.repeat > 1) {
+      setShowRepeatExplosion(true);
+      setRepeatNum(locationState?.repeat ?? 2);
+      const timer = window.setTimeout(() => {
+        setShowRepeatExplosion(false);
+      }, 2800);
+      const clearedPath = `${location.pathname}${location.search}${location.hash}`;
+      navigate(clearedPath, { replace: true });
+      return () => window.clearTimeout(timer);
     }
 
     setShowConfetti(true);
@@ -148,6 +163,7 @@ const LogPage: React.FC = () => {
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
       {showConfetti && <ConfettiExplosion onComplete={() => setShowConfetti(false)} />}
+      {showRepeatExplosion && <RepeatExplosion onComplete={() => setShowRepeatExplosion(false)} repeatNumber={repeatNum} />}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Log</h1>
         <div className="flex items-center gap-3">

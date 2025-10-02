@@ -11,7 +11,7 @@ const EntryFlow: React.FC = () => {
   const [step, setStep] = useState<Step>('input');
   const [carNumber, setCarNumber] = useState<string>('');
   const [line, setLine] = useState<string | null>(null);
-  const { addLog } = useLogsContext();
+  const { addLog, getCarCount } = useLogsContext();
   const navigate = useNavigate();
 
   const resetFlow = useCallback(() => {
@@ -50,8 +50,9 @@ const EntryFlow: React.FC = () => {
     }
 
     addLog(carNumber, line);
+    const repeat = getCarCount(carNumber);
     resetFlow();
-    navigate('/log', { state: { fromNewEntry: true } });
+    navigate('/log', { state: { fromNewEntry: true, repeat } });
   };
 
   const handleCancel = () => {
