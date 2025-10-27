@@ -209,22 +209,21 @@ const LogPage: React.FC = () => {
             <table className="min-w-full table-auto text-left">
               <thead className="bg-slate-100">
                 <tr>
-                  {["Rank", "Car", "Lines"].map(header => (
+                  {["Car", "Repeats"].map(header => (
                     <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {leaderboard.map((item, index) => {
-                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono w-1/3";
+                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono";
                   return (
                     <tr key={item.car} className="even:bg-slate-50">
-                      <td className={rowClasses}>#{index + 1}</td>
-                      <td className={rowClasses}>{item.car}</td>
+                      <td className={rowClasses + " w-1/2"}>{item.car}</td>
                       <td className={rowClasses}>
-                        <div className="grid grid-cols-3 md:grid-cols-5 gap-1 w-fit"> 
-                          { item.entries.map((line) => {
-                            return (<img className="w-8 aspect-square" src={assetUrl(`/img/${line}.svg`)}/>);
+                        <div className="grid grid-cols-3 gap-1 w-fit"> 
+                          { item.entries.map((line, index) => {
+                            return (<img className="w-12 aspect-square" src={assetUrl(`/img/${line}.svg`)} key={index}/>);
                           })}
                         </div>
                       </td>
