@@ -29,11 +29,14 @@ const LogPage: React.FC = () => {
   const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
 
   const { totalLoggedCars, repeatCars, leaderboard } = useMemo(() => {
-    const counts = new Map<string, number>();
+    const carToLogEntries = new Map<string, Array<string>>();
     const latestTimestamps = new Map<string, number>();
 
     for (const entry of logs) {
-      counts.set(entry.car, (counts.get(entry.car) ?? 0) + 1);
+      if (!carToLogEntries.has(entry.car)) {
+        carToLogEntries.set(entry.car, []);
+      }
+      carToLogEntries.get(entry.car)?.push(entry.line);
       const currentLatest = latestTimestamps.get(entry.car) ?? 0;
       if (entry.timestamp > currentLatest) {
         latestTimestamps.set(entry.car, entry.timestamp);
@@ -41,22 +44,23 @@ const LogPage: React.FC = () => {
     }
 
     let repeated: string[] = [];
-    const leaderboardData: Array<{ car: string; count: number; latestTimestamp: number }> = [];
+    const leaderboardData: Array<{ car: string; entries: string[]; latestTimestamp: number }> = [];
 
-    counts.forEach((count: number, car: string) => {
-      if (count > 1) {
+    carToLogEntries.forEach((entries: Array<string>, car: string) => {
+      if (entries.length > 1) {
         repeated.push(car);
         leaderboardData.push({
           car,
-          count,
+          // reverse chronological order
+          entries: [...entries].reverse(),
           latestTimestamp: latestTimestamps.get(car) ?? 0
         });
       }
     });
 
     leaderboardData.sort((a, b) => {
-      if (b.count !== a.count) {
-        return b.count - a.count;
+      if (b.entries.length !== a.entries.length) {
+        return b.entries.length - a.entries.length;
       }
       return b.latestTimestamp - a.latestTimestamp;
     });
@@ -199,76 +203,88 @@ const LogPage: React.FC = () => {
       </div>
 
       {leaderboard.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <table className="min-w-full table-auto text-left">
-            <thead className="bg-slate-100">
-              <tr>
-                {["Rank", "Car", "Count"].map(header => (
-                  <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((item, index) => {
-                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono w-1/3";
-                return (
-                  <tr key={item.car} className="even:bg-slate-50">
-                    <td className={rowClasses}>#{index + 1}</td>
-                    <td className={rowClasses}>{item.car}</td>
-                    <td className={rowClasses}>{item.count}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Repeat Cars</h2>
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <table className="min-w-full table-auto text-left">
+              <thead className="bg-slate-100">
+                <tr>
+                  {["Rank", "Car", "Lines"].map(header => (
+                    <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboard.map((item, index) => {
+                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono w-1/3";
+                  return (
+                    <tr key={item.car} className="even:bg-slate-50">
+                      <td className={rowClasses}>#{index + 1}</td>
+                      <td className={rowClasses}>{item.car}</td>
+                      <td className={rowClasses}>
+                        <div className="grid grid-cols-3 md:grid-cols-5 gap-1 w-fit"> 
+                          { item.entries.map((line) => {
+                            return (<img className="w-8 aspect-square" src={assetUrl(`/img/${line}.svg`)}/>);
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {sortedLogs.length === 0 ? (
         <p className="text-slate-600">No trips yet. Log your first train car!</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <table className="min-w-full table-auto text-left">
-            <thead className="bg-slate-100">
-              <tr>
-                { ["Date", "Car", "Line"].map(header => (
-                  <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
-                )) }
-              </tr>
-            </thead>
-            <tbody>
-              {sortedLogs.map((entry) => {
-                const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
-                const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
-                const swipeState = swipeStates.get(entryId);
-                const swipeOffset = swipeState ? Math.min(0, swipeState.currentX - swipeState.startX) : 0;
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Full Log</h2>
+          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <table className="min-w-full table-auto text-left">
+              <thead className="bg-slate-100">
+                <tr>
+                  { ["Date", "Car", "Line"].map(header => (
+                    <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
+                  )) }
+                </tr>
+              </thead>
+              <tbody>
+                {sortedLogs.map((entry) => {
+                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
+                  const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
+                  const swipeState = swipeStates.get(entryId);
+                  const swipeOffset = swipeState ? Math.min(0, swipeState.currentX - swipeState.startX) : 0;
 
-                return (
-                  <tr
-                    key={entryId}
-                    className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
-                    style={{
-                      transform: `translateX(${swipeOffset}px)`,
-                      transition: swipeState?.isDragging ? 'none' : 'transform 0.3s ease-out'
-                    }}
-                    onTouchStart={(event) => handleSwipeStart(event, entryId)}
-                    onTouchMove={(event) => handleSwipeMove(event, entryId)}
-                    onTouchEnd={() => handleSwipeEnd(entry, entryId)}
-                    onMouseDown={(event) => handleSwipeStart(event, entryId)}
-                    onMouseMove={(event) => handleSwipeMove(event, entryId)}
-                    onMouseUp={() => handleSwipeEnd(entry, entryId)}
-                    onMouseLeave={() => handleSwipeEnd(entry, entryId)}
-                  >
-                    <td className={rowClasses}>
-                      {new Date(entry.timestamp).toLocaleString()}
-                    </td>
-                    <td className={rowClasses}>{entry.car}</td>
-                    <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr
+                      key={entryId}
+                      className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
+                      style={{
+                        transform: `translateX(${swipeOffset}px)`,
+                        transition: swipeState?.isDragging ? 'none' : 'transform 0.3s ease-out'
+                      }}
+                      onTouchStart={(event) => handleSwipeStart(event, entryId)}
+                      onTouchMove={(event) => handleSwipeMove(event, entryId)}
+                      onTouchEnd={() => handleSwipeEnd(entry, entryId)}
+                      onMouseDown={(event) => handleSwipeStart(event, entryId)}
+                      onMouseMove={(event) => handleSwipeMove(event, entryId)}
+                      onMouseUp={() => handleSwipeEnd(entry, entryId)}
+                      onMouseLeave={() => handleSwipeEnd(entry, entryId)}
+                    >
+                      <td className={rowClasses}>
+                        {new Date(entry.timestamp).toLocaleString()}
+                      </td>
+                      <td className={rowClasses}>{entry.car}</td>
+                      <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
