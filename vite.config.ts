@@ -22,9 +22,9 @@ export default defineConfig(({ command }) => ({
             src: "/img/icon.png",
             purpose: "maskable any",
             type: "image/png",
-            sizes: "any"
-          }
-        ]
+            sizes: "any",
+          },
+        ],
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],

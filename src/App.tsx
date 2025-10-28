@@ -1,7 +1,7 @@
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import EntryFlow from './pages/EntryFlow';
-import LogPage from './pages/LogPage';
+import React from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import EntryFlow from "./pages/EntryFlow";
+import LogPage from "./pages/LogPage";
 
 const App: React.FC = () => {
   return (

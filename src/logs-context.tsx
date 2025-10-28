@@ -1,5 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from './storage';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from "./storage";
 
 interface LogsContextValue {
   logs: TrainLogEntry[];
@@ -10,21 +17,26 @@ interface LogsContextValue {
 
 const LogsContext = createContext<LogsContextValue | undefined>(undefined);
 
-export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const LogsProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
   const [logs, setLogs] = useState<TrainLogEntry[]>(() => loadLogs());
 
-  const addLog = useCallback((car: string, line: string, timestamp?: number) => {
-    setLogs((prev) => {
-      const nextEntry: TrainLogEntry = {
-        car,
-        line,
-        timestamp: timestamp ?? Math.floor(Date.now()),
-      };
-      const nextLogs = [...prev, nextEntry];
-      saveLogs(nextLogs);
-      return nextLogs;
-    });
-  }, []);
+  const addLog = useCallback(
+    (car: string, line: string, timestamp?: number) => {
+      setLogs((prev) => {
+        const nextEntry: TrainLogEntry = {
+          car,
+          line,
+          timestamp: timestamp ?? Math.floor(Date.now()),
+        };
+        const nextLogs = [...prev, nextEntry];
+        saveLogs(nextLogs);
+        return nextLogs;
+      });
+    },
+    [],
+  );
 
   const removeLog = useCallback((entryToRemove: TrainLogEntry) => {
     setLogs((prev) => {
@@ -49,13 +61,16 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     });
   }, []);
 
-  const getCarCount = useCallback((car: string): number => {
-    const newLogs = loadLogs();
-    return newLogs.filter(entry => entry.car === car).length;
-  }, [loadLogs]);
+  const getCarCount = useCallback(
+    (car: string): number => {
+      const newLogs = loadLogs();
+      return newLogs.filter((entry) => entry.car === car).length;
+    },
+    [loadLogs],
+  );
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -65,11 +80,14 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       }
     };
 
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const value = useMemo(() => ({ logs, addLog, removeLog, getCarCount }), [logs, addLog, removeLog, getCarCount]);
+  const value = useMemo(
+    () => ({ logs, addLog, removeLog, getCarCount }),
+    [logs, addLog, removeLog, getCarCount],
+  );
 
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 };
@@ -77,7 +95,7 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 export function useLogsContext(): LogsContextValue {
   const context = useContext(LogsContext);
   if (!context) {
-    throw new Error('useLogsContext must be used within a LogsProvider');
+    throw new Error("useLogsContext must be used within a LogsProvider");
   }
   return context;
 }

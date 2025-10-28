@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import { useLogsContext } from '../logs-context';
-import { assetUrl } from '../assets';
-import ConfettiExplosion from '../components/ConfettiExplosion';
-import RepeatExplosion from '../components/RepeatExplosion';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../components/ui/Button";
+import { useLogsContext } from "../logs-context";
+import { assetUrl } from "../assets";
+import ConfettiExplosion from "../components/ConfettiExplosion";
+import RepeatExplosion from "../components/RepeatExplosion";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -24,9 +24,14 @@ const LogPage: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showRepeatExplosion, setShowRepeatExplosion] = useState(false);
   const [repeatNum, setRepeatNum] = useState(0);
-  const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(new Map());
+  const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(
+    new Map(),
+  );
 
-  const sortedLogs = useMemo(() => [...logs].sort((a, b) => b.timestamp - a.timestamp), [logs]);
+  const sortedLogs = useMemo(
+    () => [...logs].sort((a, b) => b.timestamp - a.timestamp),
+    [logs],
+  );
 
   const { totalLoggedCars, repeatCars, leaderboard } = useMemo(() => {
     const carToLogEntries = new Map<string, Array<string>>();
@@ -44,7 +49,11 @@ const LogPage: React.FC = () => {
     }
 
     let repeated: string[] = [];
-    const leaderboardData: Array<{ car: string; entries: string[]; latestTimestamp: number }> = [];
+    const leaderboardData: Array<{
+      car: string;
+      entries: string[];
+      latestTimestamp: number;
+    }> = [];
 
     carToLogEntries.forEach((entries: Array<string>, car: string) => {
       if (entries.length > 1) {
@@ -53,7 +62,7 @@ const LogPage: React.FC = () => {
           car,
           // reverse chronological order
           entries: [...entries].reverse(),
-          latestTimestamp: latestTimestamps.get(car) ?? 0
+          latestTimestamp: latestTimestamps.get(car) ?? 0,
         });
       }
     });
@@ -102,44 +111,65 @@ const LogPage: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [location, navigate]);
 
-  const handleSwipeStart = useCallback((event: React.TouchEvent | React.MouseEvent, entryId: string) => {
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    setSwipeStates(prev => new Map(prev.set(entryId, {
-      startX: clientX,
-      currentX: clientX,
-      isDragging: true
-    })));
-  }, []);
+  const handleSwipeStart = useCallback(
+    (event: React.TouchEvent | React.MouseEvent, entryId: string) => {
+      const clientX =
+        "touches" in event ? event.touches[0].clientX : event.clientX;
+      setSwipeStates(
+        (prev) =>
+          new Map(
+            prev.set(entryId, {
+              startX: clientX,
+              currentX: clientX,
+              isDragging: true,
+            }),
+          ),
+      );
+    },
+    [],
+  );
 
-  const handleSwipeMove = useCallback((event: React.TouchEvent | React.MouseEvent, entryId: string) => {
-    const swipeState = swipeStates.get(entryId);
-    if (!swipeState?.isDragging) return;
+  const handleSwipeMove = useCallback(
+    (event: React.TouchEvent | React.MouseEvent, entryId: string) => {
+      const swipeState = swipeStates.get(entryId);
+      if (!swipeState?.isDragging) return;
 
-    event.preventDefault();
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    setSwipeStates(prev => new Map(prev.set(entryId, {
-      ...swipeState,
-      currentX: clientX
-    })));
-  }, [swipeStates]);
+      event.preventDefault();
+      const clientX =
+        "touches" in event ? event.touches[0].clientX : event.clientX;
+      setSwipeStates(
+        (prev) =>
+          new Map(
+            prev.set(entryId, {
+              ...swipeState,
+              currentX: clientX,
+            }),
+          ),
+      );
+    },
+    [swipeStates],
+  );
 
-  const handleSwipeEnd = useCallback((entry: typeof sortedLogs[number], entryId: string) => {
-    const swipeState = swipeStates.get(entryId);
-    if (!swipeState?.isDragging) return;
+  const handleSwipeEnd = useCallback(
+    (entry: (typeof sortedLogs)[number], entryId: string) => {
+      const swipeState = swipeStates.get(entryId);
+      if (!swipeState?.isDragging) return;
 
-    const swipeDistance = swipeState.startX - swipeState.currentX;
-    const deleteThreshold = 150;
+      const swipeDistance = swipeState.startX - swipeState.currentX;
+      const deleteThreshold = 150;
 
-    if (swipeDistance > deleteThreshold) {
-      removeLog(entry);
-    }
+      if (swipeDistance > deleteThreshold) {
+        removeLog(entry);
+      }
 
-    setSwipeStates(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(entryId);
-      return newMap;
-    });
-  }, [swipeStates, removeLog]);
+      setSwipeStates((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(entryId);
+        return newMap;
+      });
+    },
+    [swipeStates, removeLog],
+  );
 
   const handleExport = useCallback(() => {
     if (sortedLogs.length === 0) {
@@ -147,16 +177,18 @@ const LogPage: React.FC = () => {
     }
 
     const timestamp = new Date();
-    const pad = (value: number) => value.toString().padStart(2, '0');
+    const pad = (value: number) => value.toString().padStart(2, "0");
     const fileName = `train-car-log-${timestamp.getFullYear()}${pad(timestamp.getMonth() + 1)}${pad(timestamp.getDate())}-${pad(timestamp.getHours())}${pad(timestamp.getMinutes())}${pad(timestamp.getSeconds())}.json`;
 
-    const blob = new Blob([JSON.stringify(sortedLogs, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(sortedLogs, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = fileName;
-    link.rel = 'noopener';
+    link.rel = "noopener";
     link.click();
 
     window.setTimeout(() => {
@@ -166,39 +198,53 @@ const LogPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
-      {showConfetti && <ConfettiExplosion onComplete={() => setShowConfetti(false)} />}
-      {showRepeatExplosion && <RepeatExplosion onComplete={() => setShowRepeatExplosion(false)} repeatNumber={repeatNum} />}
+      {showConfetti && (
+        <ConfettiExplosion onComplete={() => setShowConfetti(false)} />
+      )}
+      {showRepeatExplosion && (
+        <RepeatExplosion
+          onComplete={() => setShowRepeatExplosion(false)}
+          repeatNumber={repeatNum}
+        />
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Log</h1>
         <div className="flex items-center gap-3">
-          {sortedLogs.length > 0 && <Button
-            variant="pill"
-            onClick={handleExport}
-            disabled={sortedLogs.length === 0}
-          >
-            Export JSON
-          </Button>}
-          <Button
-            variant="pill"
-            onClick={() => navigate('/')}
-          >
+          {sortedLogs.length > 0 && (
+            <Button
+              variant="pill"
+              onClick={handleExport}
+              disabled={sortedLogs.length === 0}
+            >
+              Export JSON
+            </Button>
+          )}
+          <Button variant="pill" onClick={() => navigate("/")}>
             Close
           </Button>
         </div>
       </div>
       <div>
-        <p className="text-base text-slate-600">Entries are stored on this device and ordered by most recent first.</p>
-        <p className="text-base text-slate-600 mt-2">Swipe left to delete a row.</p>
+        <p className="text-base text-slate-600">
+          Entries are stored on this device and ordered by most recent first.
+        </p>
+        <p className="text-base text-slate-600 mt-2">
+          Swipe left to delete a row.
+        </p>
       </div>
 
       <div className="grid gap-4 grid-cols-2 text-center">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-medium text-slate-500">TOTAL CARS</p>
-          <p className="text-3xl font-semibold text-slate-900">{totalLoggedCars}</p>
+          <p className="text-3xl font-semibold text-slate-900">
+            {totalLoggedCars}
+          </p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-medium text-slate-500">REPEAT CARS</p>
-          <p className="text-3xl font-semibold text-slate-900">{repeatCars.length > 0 ? repeatCars.length : '–'}</p>
+          <p className="text-3xl font-semibold text-slate-900">
+            {repeatCars.length > 0 ? repeatCars.length : "–"}
+          </p>
         </div>
       </div>
 
@@ -209,21 +255,33 @@ const LogPage: React.FC = () => {
             <table className="min-w-full table-auto text-left">
               <thead className="bg-slate-100">
                 <tr>
-                  {["Car", "Repeats"].map(header => (
-                    <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
+                  {["Car", "Repeats"].map((header) => (
+                    <th
+                      key={header}
+                      className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4"
+                    >
+                      {header}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {leaderboard.map((item, index) => {
-                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono";
+                  const rowClasses =
+                    "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono";
                   return (
                     <tr key={item.car} className="even:bg-slate-50">
                       <td className={rowClasses + " w-1/2"}>{item.car}</td>
                       <td className={rowClasses}>
-                        <div className="grid grid-cols-3 gap-1 w-fit"> 
-                          { item.entries.map((line, index) => {
-                            return (<img className="w-12 aspect-square" src={assetUrl(`/img/${line}.svg`)} key={index}/>);
+                        <div className="grid grid-cols-3 gap-1 w-fit">
+                          {item.entries.map((line, index) => {
+                            return (
+                              <img
+                                className="w-12 aspect-square"
+                                src={assetUrl(`/img/${line}.svg`)}
+                                key={index}
+                              />
+                            );
                           })}
                         </div>
                       </td>
@@ -237,7 +295,9 @@ const LogPage: React.FC = () => {
       )}
 
       {sortedLogs.length === 0 ? (
-        <p className="text-slate-600">No trips yet. Log your first train car!</p>
+        <p className="text-slate-600">
+          No trips yet. Log your first train car!
+        </p>
       ) : (
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Full Log</h2>
@@ -245,17 +305,25 @@ const LogPage: React.FC = () => {
             <table className="min-w-full table-auto text-left">
               <thead className="bg-slate-100">
                 <tr>
-                  { ["Date", "Car", "Line"].map(header => (
-                    <th key={header} className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4">{header}</th>
-                  )) }
+                  {["Date", "Car", "Line"].map((header) => (
+                    <th
+                      key={header}
+                      className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4"
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {sortedLogs.map((entry) => {
-                  const rowClasses = "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
+                  const rowClasses =
+                    "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
                   const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
                   const swipeState = swipeStates.get(entryId);
-                  const swipeOffset = swipeState ? Math.min(0, swipeState.currentX - swipeState.startX) : 0;
+                  const swipeOffset = swipeState
+                    ? Math.min(0, swipeState.currentX - swipeState.startX)
+                    : 0;
 
                   return (
                     <tr
@@ -263,7 +331,9 @@ const LogPage: React.FC = () => {
                       className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
                       style={{
                         transform: `translateX(${swipeOffset}px)`,
-                        transition: swipeState?.isDragging ? 'none' : 'transform 0.3s ease-out'
+                        transition: swipeState?.isDragging
+                          ? "none"
+                          : "transform 0.3s ease-out",
                       }}
                       onTouchStart={(event) => handleSwipeStart(event, entryId)}
                       onTouchMove={(event) => handleSwipeMove(event, entryId)}
@@ -277,7 +347,12 @@ const LogPage: React.FC = () => {
                         {new Date(entry.timestamp).toLocaleString()}
                       </td>
                       <td className={rowClasses}>{entry.car}</td>
-                      <td className={rowClasses}><img className="w-8 aspect-square" src={assetUrl(`/img/${entry.line}.svg`)}/></td>
+                      <td className={rowClasses}>
+                        <img
+                          className="w-8 aspect-square"
+                          src={assetUrl(`/img/${entry.line}.svg`)}
+                        />
+                      </td>
                     </tr>
                   );
                 })}

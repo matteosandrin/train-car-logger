@@ -1,23 +1,23 @@
-import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CarInputPad from '../components/CarInputPad';
-import LinePicker from '../components/LinePicker';
-import ConfirmationScreen from '../components/ConfirmationScreen';
-import { useLogsContext } from '../logs-context';
+import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CarInputPad from "../components/CarInputPad";
+import LinePicker from "../components/LinePicker";
+import ConfirmationScreen from "../components/ConfirmationScreen";
+import { useLogsContext } from "../logs-context";
 
-type Step = 'input' | 'line' | 'confirm';
+type Step = "input" | "line" | "confirm";
 
 const EntryFlow: React.FC = () => {
-  const [step, setStep] = useState<Step>('input');
-  const [carNumber, setCarNumber] = useState<string>('');
+  const [step, setStep] = useState<Step>("input");
+  const [carNumber, setCarNumber] = useState<string>("");
   const [line, setLine] = useState<string | null>(null);
   const { addLog, getCarCount } = useLogsContext();
   const navigate = useNavigate();
 
   const resetFlow = useCallback(() => {
-    setCarNumber('');
+    setCarNumber("");
     setLine(null);
-    setStep('input');
+    setStep("input");
   }, []);
 
   const handleDigit = (digit: string) => {
@@ -35,13 +35,13 @@ const EntryFlow: React.FC = () => {
 
   const handleConfirmNumber = () => {
     if (carNumber.length === 4) {
-      setStep('line');
+      setStep("line");
     }
   };
 
   const handleLineSelect = (selectedLine: string) => {
     setLine(selectedLine);
-    setStep('confirm');
+    setStep("confirm");
   };
 
   const handleConfirm = () => {
@@ -52,25 +52,32 @@ const EntryFlow: React.FC = () => {
     addLog(carNumber, line);
     const repeat = getCarCount(carNumber);
     resetFlow();
-    navigate('/log', { state: { fromNewEntry: true, repeat } });
+    navigate("/log", { state: { fromNewEntry: true, repeat } });
   };
 
   const handleCancel = () => {
     resetFlow();
   };
 
-  if (step === 'line') {
+  if (step === "line") {
     return (
       <LinePicker
         selectedLine={line}
         onSelect={handleLineSelect}
-        onBack={() => setStep('input')}
+        onBack={() => setStep("input")}
       />
     );
   }
 
-  if (step === 'confirm' && line) {
-    return <ConfirmationScreen carNumber={carNumber} line={line} onConfirm={handleConfirm} onCancel={handleCancel} />;
+  if (step === "confirm" && line) {
+    return (
+      <ConfirmationScreen
+        carNumber={carNumber}
+        line={line}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
+    );
   }
 
   return (
@@ -80,7 +87,7 @@ const EntryFlow: React.FC = () => {
       onBackspace={handleBackspace}
       onReset={resetFlow}
       onConfirm={handleConfirmNumber}
-      onSeeLog={() => navigate('/log')}
+      onSeeLog={() => navigate("/log")}
     />
   );
 };

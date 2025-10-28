@@ -4,7 +4,7 @@ export interface TrainLogEntry {
   line: string;
 }
 
-const STORAGE_KEY = 'train-car-logger';
+const STORAGE_KEY = "train-car-logger";
 
 interface PersistedData {
   data: TrainLogEntry[];
@@ -24,13 +24,13 @@ function parseStoredData(raw: string | null): PersistedData {
     }
     return emptyData;
   } catch (error) {
-    console.warn('Failed to parse stored train log data', error);
+    console.warn("Failed to parse stored train log data", error);
     return emptyData;
   }
 }
 
 export function loadLogs(): TrainLogEntry[] {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return [];
   }
 
@@ -39,7 +39,7 @@ export function loadLogs(): TrainLogEntry[] {
 }
 
 export function saveLogs(entries: TrainLogEntry[]): void {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
 

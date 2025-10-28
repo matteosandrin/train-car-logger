@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { assetUrl } from '../assets';
+import React, { useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { assetUrl } from "../assets";
 
 type RepeatExplosionProps = {
   duration?: number;
@@ -10,14 +10,36 @@ type RepeatExplosionProps = {
 };
 
 type ParticleStyle = React.CSSProperties & {
-  '--particle-translate-x': string;
-  '--particle-translate-y': string;
-  '--particle-scale': string;
-  '--particle-rotation': string;
+  "--particle-translate-x": string;
+  "--particle-translate-y": string;
+  "--particle-scale": string;
+  "--particle-rotation": string;
 };
 
 // All available subway line icons
-const SUBWAY_LINES = ['1', '2', '3', '4', '5', '6', '7', 'a', 'd', 'e', 'f', 'g', 'j', 'l', 'm', 'n', 'q', 'r', 's', 'w', 'z'];
+const SUBWAY_LINES = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "a",
+  "d",
+  "e",
+  "f",
+  "g",
+  "j",
+  "l",
+  "m",
+  "n",
+  "q",
+  "r",
+  "s",
+  "w",
+  "z",
+];
 
 const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
   repeatNumber,
@@ -28,13 +50,13 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
   const repeatText = (() => {
     switch (repeatNumber) {
       case 2:
-        return 'DOUBLE';
+        return "DOUBLE";
       case 3:
-        return 'TRIPLE';
+        return "TRIPLE";
       case 4:
-        return 'QUADRUPLE';
+        return "QUADRUPLE";
       case 5:
-        return 'QUINTUPLE';
+        return "QUINTUPLE";
       default:
         return `${repeatNumber}X`;
     }
@@ -44,7 +66,8 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
       const angle = Math.random() * Math.PI * 2;
       const distance = 150 + Math.random() * 200;
       const size = 32 + Math.random() * 24;
-      const line = SUBWAY_LINES[Math.floor(Math.random() * SUBWAY_LINES.length)];
+      const line =
+        SUBWAY_LINES[Math.floor(Math.random() * SUBWAY_LINES.length)];
 
       return {
         id: index,
@@ -66,12 +89,15 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
     return () => window.clearTimeout(timeout);
   }, [duration, onComplete]);
 
-  if (typeof document === 'undefined') {
+  if (typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" aria-hidden="true">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+      aria-hidden="true"
+    >
       {/* Subway icon particles */}
       <div className="absolute inset-0 flex items-center justify-center">
         {particles.map((particle) => {
@@ -80,10 +106,10 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
             height: `${particle.size}px`,
             animationDuration: `${duration}ms`,
             animationDelay: `${particle.delay}ms`,
-            '--particle-translate-x': `${particle.translateX}px`,
-            '--particle-translate-y': `${particle.translateY}px`,
-            '--particle-scale': `${particle.scale}`,
-            '--particle-rotation': `${particle.rotation}deg`,
+            "--particle-translate-x": `${particle.translateX}px`,
+            "--particle-translate-y": `${particle.translateY}px`,
+            "--particle-scale": `${particle.scale}`,
+            "--particle-rotation": `${particle.rotation}deg`,
           };
           return (
             <img
@@ -107,7 +133,7 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
         {repeatText}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 
 type ConfettiExplosionProps = {
   duration?: number;
@@ -8,13 +8,20 @@ type ConfettiExplosionProps = {
 };
 
 type ConfettiStyle = React.CSSProperties & {
-  '--confetti-translate-x': string;
-  '--confetti-translate-y': string;
-  '--confetti-scale': string;
-  '--confetti-rotation': string;
+  "--confetti-translate-x": string;
+  "--confetti-translate-y": string;
+  "--confetti-scale": string;
+  "--confetti-rotation": string;
 };
 
-const COLORS = ['#f97316', '#facc15', '#22c55e', '#38bdf8', '#a855f7', '#ec4899'];
+const COLORS = [
+  "#f97316",
+  "#facc15",
+  "#22c55e",
+  "#38bdf8",
+  "#a855f7",
+  "#ec4899",
+];
 
 const ConfettiExplosion: React.FC<ConfettiExplosionProps> = ({
   duration = 2200,
@@ -49,7 +56,7 @@ const ConfettiExplosion: React.FC<ConfettiExplosionProps> = ({
     return () => window.clearTimeout(timeout);
   }, [duration, onComplete]);
 
-  if (typeof document === 'undefined') {
+  if (typeof document === "undefined") {
     return null;
   }
 
@@ -63,15 +70,17 @@ const ConfettiExplosion: React.FC<ConfettiExplosionProps> = ({
           backgroundColor: particle.color,
           animationDuration: `${duration}ms`,
           animationDelay: `${particle.delay}ms`,
-          '--confetti-translate-x': `${particle.translateX}px`,
-          '--confetti-translate-y': `${particle.translateY}px`,
-          '--confetti-scale': `${particle.scale}`,
-          '--confetti-rotation': `${particle.rotation}deg`,
+          "--confetti-translate-x": `${particle.translateX}px`,
+          "--confetti-translate-y": `${particle.translateY}px`,
+          "--confetti-scale": `${particle.scale}`,
+          "--confetti-rotation": `${particle.rotation}deg`,
         };
-        return <span key={particle.id} className="confetti-piece" style={style} />;
+        return (
+          <span key={particle.id} className="confetti-piece" style={style} />
+        );
       })}
     </div>,
-    document.body
+    document.body,
   );
 };
 

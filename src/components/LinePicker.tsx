@@ -1,32 +1,32 @@
-import React from 'react';
-import Button from './ui/Button';
-import FlowContainer from './ui/FlowContainer';
-import { assetUrl } from '../assets';
+import React from "react";
+import Button from "./ui/Button";
+import FlowContainer from "./ui/FlowContainer";
+import { assetUrl } from "../assets";
 
 const LINES = [
-  '1',
-  '2',
-  '3',
-  '7',
-  '4',
-  '5',
-  '6',
-  'g',
-  'a',
-  'c',
-  'e',
-  'l',
-  'b',
-  'd',
-  'f',
-  'm',
-  'n',
-  'q',
-  'r',
-  'w',
-  'j',
-  'z',
-  's',
+  "1",
+  "2",
+  "3",
+  "7",
+  "4",
+  "5",
+  "6",
+  "g",
+  "a",
+  "c",
+  "e",
+  "l",
+  "b",
+  "d",
+  "f",
+  "m",
+  "n",
+  "q",
+  "r",
+  "w",
+  "j",
+  "z",
+  "s",
 ];
 
 interface LinePickerProps {
@@ -35,7 +35,11 @@ interface LinePickerProps {
   selectedLine?: string | null;
 }
 
-const LinePicker: React.FC<LinePickerProps> = ({ onSelect, onBack, selectedLine }) => {
+const LinePicker: React.FC<LinePickerProps> = ({
+  onSelect,
+  onBack,
+  selectedLine,
+}) => {
   return (
     <FlowContainer>
       <div className="flex w-full items-center justify-between gap-3">

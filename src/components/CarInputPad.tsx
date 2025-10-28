@@ -1,6 +1,6 @@
-import React from 'react';
-import Button from './ui/Button';
-import FlowContainer from './ui/FlowContainer';
+import React from "react";
+import Button from "./ui/Button";
+import FlowContainer from "./ui/FlowContainer";
 
 interface CarInputPadProps {
   value: string;
@@ -13,7 +13,7 @@ interface CarInputPadProps {
 
 const MAX_LENGTH = 4;
 
-const keypadDigits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const keypadDigits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 const CarInputPad: React.FC<CarInputPadProps> = ({
   value,
@@ -34,14 +34,19 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
         </Button>
       </div>
       <div className="w-full md:w-fit rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
-        <p className="text-base text-slate-600">Enter the 4-digit car number.</p>
-        <div className="flex justify-center gap-3 mt-4 md:gap-4 text-3xl tracking-[0.24em]" aria-label="car number">
+        <p className="text-base text-slate-600">
+          Enter the 4-digit car number.
+        </p>
+        <div
+          className="flex justify-center gap-3 mt-4 md:gap-4 text-3xl tracking-[0.24em]"
+          aria-label="car number"
+        >
           {Array.from({ length: MAX_LENGTH }).map((_, index) => (
             <div
               key={index}
               className={`flex h-20 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-semibold text-slate-600 shadow-inner transition-colors duration-150 `}
             >
-              <div className="mr-[-0.5rem]">{value[index] ?? '•'}</div>
+              <div className="mr-[-0.5rem]">{value[index] ?? "•"}</div>
             </div>
           ))}
         </div>
@@ -63,7 +68,7 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
         </Button>
         <Button
           variant="keypad"
-          onClick={() => onDigit('0')}
+          onClick={() => onDigit("0")}
           disabled={value.length >= MAX_LENGTH}
         >
           0
@@ -73,12 +78,8 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
         </Button>
       </div>
 
-      <Button
-        variant="primary"
-        onClick={onConfirm}
-        disabled={!isFull}
-      >
-        {isFull ? 'Continue' : 'Enter 4 digits'}
+      <Button variant="primary" onClick={onConfirm} disabled={!isFull}>
+        {isFull ? "Continue" : "Enter 4 digits"}
       </Button>
     </FlowContainer>
   );
