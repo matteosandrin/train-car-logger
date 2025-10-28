@@ -208,21 +208,13 @@ const LogPage: React.FC = () => {
         />
       )}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Log</h1>
-        <div className="flex items-center gap-3">
-          {sortedLogs.length > 0 && (
-            <Button
-              variant="pill"
-              onClick={handleExport}
-              disabled={sortedLogs.length === 0}
-            >
-              Export JSON
-            </Button>
-          )}
-          <Button variant="pill" onClick={() => navigate("/")}>
-            Close
-          </Button>
-        </div>
+        <Button variant="pill" onClick={() => navigate("/")} className="">
+          Home
+        </Button>
+        <h1 className="text-2xl font-semibold">Train Log</h1>
+        <span aria-hidden="true" className="invisible w-20">
+          Home
+        </span>
       </div>
       <div>
         <p className="text-base text-slate-600">
@@ -359,6 +351,14 @@ const LogPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+          <Button
+            variant="pill"
+            onClick={handleExport}
+            disabled={sortedLogs.length === 0}
+            className="w-full"
+          >
+            Export JSON
+          </Button>
         </div>
       )}
     </div>
