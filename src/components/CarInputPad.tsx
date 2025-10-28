@@ -23,63 +23,63 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
   onConfirm,
   onSeeLog,
 }) => {
-  const isFull = value.length === MAX_LENGTH;
+  if (value.length === MAX_LENGTH) {
+    onConfirm();
+  }
 
   return (
-    <FlowContainer>
-      <div className="flex w-full items-center justify-between gap-3">
-        <h1 className="font-bold text-3xl">Train Car Logger</h1>
-        <Button variant="pill" onClick={onSeeLog}>
-          See log
-        </Button>
-      </div>
-      <div className="w-full md:w-fit rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
-        <p className="text-base text-slate-600">
-          Enter the 4-digit car number.
-        </p>
-        <div
-          className="flex justify-center gap-3 mt-4 md:gap-4 text-3xl tracking-[0.24em]"
-          aria-label="car number"
-        >
-          {Array.from({ length: MAX_LENGTH }).map((_, index) => (
-            <div
-              key={index}
-              className={`flex h-20 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-semibold text-slate-600 shadow-inner transition-colors duration-150 `}
-            >
-              <div className="mr-[-0.5rem]">{value[index] ?? "•"}</div>
-            </div>
-          ))}
+    <FlowContainer className="flex flex-col">
+      <div className="flex-grow flex flex-col gap-6">
+        <div className="flex w-full items-center justify-between gap-3">
+          <h1 className="font-bold text-3xl">Train Car Logger</h1>
         </div>
-      </div>
+        <div className="w-full md:w-fit rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
+          <p className="text-base text-slate-600">
+            Enter the 4-digit car number.
+          </p>
+          <div
+            className="flex justify-center gap-3 mt-4 md:gap-4 text-3xl tracking-[0.24em]"
+            aria-label="car number"
+          >
+            {Array.from({ length: MAX_LENGTH }).map((_, index) => (
+              <div
+                key={index}
+                className={`flex h-20 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-semibold text-slate-600 shadow-inner transition-colors duration-150 `}
+              >
+                <div className="mr-[-0.5rem]">{value[index] ?? "•"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <div className="grid w-full grid-cols-3 gap-3 md:gap-4">
-        {keypadDigits.map((digit) => (
+        <div className="grid w-full grid-cols-3 gap-3 md:gap-4">
+          {keypadDigits.map((digit) => (
+            <Button
+              key={digit}
+              variant="keypad"
+              onClick={() => onDigit(digit)}
+              disabled={value.length >= MAX_LENGTH}
+            >
+              {digit}
+            </Button>
+          ))}
+          <Button variant="keypadSecondary" onClick={onReset}>
+            Clear
+          </Button>
           <Button
-            key={digit}
             variant="keypad"
-            onClick={() => onDigit(digit)}
+            onClick={() => onDigit("0")}
             disabled={value.length >= MAX_LENGTH}
           >
-            {digit}
+            0
           </Button>
-        ))}
-        <Button variant="keypadSecondary" onClick={onReset}>
-          Clear
-        </Button>
-        <Button
-          variant="keypad"
-          onClick={() => onDigit("0")}
-          disabled={value.length >= MAX_LENGTH}
-        >
-          0
-        </Button>
-        <Button variant="keypadSecondary" onClick={onBackspace}>
-          ⌫
-        </Button>
+          <Button variant="keypadSecondary" onClick={onBackspace}>
+            ⌫
+          </Button>
+        </div>
       </div>
-
-      <Button variant="primary" onClick={onConfirm} disabled={!isFull}>
-        {isFull ? "Continue" : "Enter 4 digits"}
+      <Button variant="primary" onClick={onSeeLog}>
+        View log
       </Button>
     </FlowContainer>
   );

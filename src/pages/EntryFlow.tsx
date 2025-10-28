@@ -64,7 +64,7 @@ const EntryFlow: React.FC = () => {
       <LinePicker
         selectedLine={line}
         onSelect={handleLineSelect}
-        onBack={() => setStep("input")}
+        onBack={resetFlow}
       />
     );
   }
