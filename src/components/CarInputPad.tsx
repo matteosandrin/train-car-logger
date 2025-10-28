@@ -29,11 +29,11 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
 
   return (
     <FlowContainer className="flex flex-col">
-      <div className="flex-grow flex flex-col gap-6">
+      <div className="flex-grow flex flex-col gap-6 w-full">
         <div className="flex w-full items-center justify-between gap-3">
           <h1 className="font-bold text-3xl">Train Car Logger</h1>
         </div>
-        <div className="w-full md:w-fit rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
+        <div className="w-full md:w-fit self-center rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
           <p className="text-base text-slate-600">
             Enter the 4-digit car number.
           </p>
