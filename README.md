@@ -1,16 +1,21 @@
-# Train Car Logger
+# Train Car Logger (NYC Subway)
 
-React + TypeScript single-page app for logging NYC subway train cars.
+Single-page app for logging NYC subway train cars. It shows when you've been in
+the same subway car multiple times. Built with React and Typescript. Can be
+installed as a PWA on mobile.
 
-|             Screenshot 1             |             Screenshot 2             |             Screenshot 3             |
-| :----------------------------------: | :----------------------------------: | :----------------------------------: |
-| ![](./screenshots/screenshot_01.png) | ![](./screenshots/screenshot_02.png) | ![](./screenshots/screenshot_03.png) |
+<table>
+    <td><img src="./screenshots/screenshot_01.png"/></td>
+    <td><img src="./screenshots/screenshot_02.png"/></td>
+    <td><img src="./screenshots/screenshot_03.png"/></td>
+</table>
 
 ## Local development
 
-- Install dependencies with `npm install`
-- Start the dev server with `npm run dev`
+- `npm install` to install dependencies
+- `npm run dev` to start the dev server with
+- `npm run format` to format the codebase
 
 ## Build
 
-- Run `npm run build` to create the production bundle in `dist/`.
+- `npm run build` to create the production build in `dist/`
