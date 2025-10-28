@@ -292,7 +292,16 @@ const LogPage: React.FC = () => {
         </p>
       ) : (
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Full Log</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Full Log</h2>
+            <Button
+              variant="pill"
+              onClick={handleExport}
+              disabled={sortedLogs.length === 0}
+            >
+              Export JSON
+            </Button>
+          </div>
           <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
             <table className="min-w-full table-auto text-left">
               <thead className="bg-slate-100">
@@ -351,14 +360,6 @@ const LogPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <Button
-            variant="pill"
-            onClick={handleExport}
-            disabled={sortedLogs.length === 0}
-            className="w-full"
-          >
-            Export JSON
-          </Button>
         </div>
       )}
     </div>
