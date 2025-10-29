@@ -3,7 +3,7 @@ import Button from "./ui/Button";
 import FlowContainer from "./ui/FlowContainer";
 import { calculateTrainStats } from "../utils/stats";
 import { useLogsContext } from "../logs-context";
-import StatsDisplay from "./StatsDisplay";
+import StatsDisplay from "./ui/StatsDisplay";
 
 interface CarInputPadProps {
   value: string;

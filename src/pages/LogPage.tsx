@@ -5,7 +5,7 @@ import { useLogsContext } from "../logs-context";
 import { assetUrl } from "../assets";
 import ConfettiExplosion from "../components/ConfettiExplosion";
 import RepeatExplosion from "../components/RepeatExplosion";
-import StatsDisplay from "../components/StatsDisplay";
+import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
 
 type LogLocationState = {
