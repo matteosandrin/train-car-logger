@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CarInputPad from "../components/CarInputPad";
-import LinePicker from "../components/LinePicker";
+import NumberPadScreen from "../components/NumberPadScreen";
+import LinePickerScreen from "../components/LinePickerScreen";
 import ConfirmationScreen from "../components/ConfirmationScreen";
 import { useLogsContext } from "../logs-context";
 
@@ -61,7 +61,7 @@ const EntryFlow: React.FC = () => {
 
   if (step === "line") {
     return (
-      <LinePicker
+      <LinePickerScreen
         selectedLine={line}
         onSelect={handleLineSelect}
         onBack={resetFlow}
@@ -81,7 +81,7 @@ const EntryFlow: React.FC = () => {
   }
 
   return (
-    <CarInputPad
+    <NumberPadScreen
       value={carNumber}
       onDigit={handleDigit}
       onBackspace={handleBackspace}

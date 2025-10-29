@@ -29,13 +29,13 @@ const LINES = [
   "s",
 ];
 
-interface LinePickerProps {
+interface LinePickerScreenProps {
   onSelect: (line: string) => void;
   onBack: () => void;
   selectedLine?: string | null;
 }
 
-const LinePicker: React.FC<LinePickerProps> = ({
+const LinePickerScreen: React.FC<LinePickerScreenProps> = ({
   onSelect,
   onBack,
   selectedLine,
@@ -70,4 +70,4 @@ const LinePicker: React.FC<LinePickerProps> = ({
   );
 };
 
-export default LinePicker;
+export default LinePickerScreen;
