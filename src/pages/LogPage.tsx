@@ -5,6 +5,7 @@ import { useLogsContext } from "../logs-context";
 import { assetUrl } from "../assets";
 import ConfettiExplosion from "../components/ConfettiExplosion";
 import RepeatExplosion from "../components/RepeatExplosion";
+import StatsDisplay from "../components/StatsDisplay";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -217,20 +218,10 @@ const LogPage: React.FC = () => {
         </span>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 text-center">
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-          <p className="text-xs font-medium text-slate-500">LOGGED CARS</p>
-          <p className="text-3xl font-semibold text-slate-900">
-            {totalLoggedCars}
-          </p>
-        </div>
-        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-          <p className="text-xs font-medium text-slate-500">REPEAT CARS</p>
-          <p className="text-3xl font-semibold text-slate-900">
-            {repeatCars.length > 0 ? repeatCars.length : "–"}
-          </p>
-        </div>
-      </div>
+      <StatsDisplay
+        loggedCarsCount={totalLoggedCars}
+        repeatCarsCount={repeatCars.length}
+      />
 
       {leaderboard.length > 0 && (
         <div className="space-y-3">
