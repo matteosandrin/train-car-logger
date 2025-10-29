@@ -21,9 +21,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary:
     "rounded-2xl bg-white px-6 py-4 font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 md:hover:bg-slate-50 active:bg-slate-100",
   keypad:
-    "rounded-2xl bg-sky-100 py-3 md:py-5 text-2xl font-semibold text-sky-700 transition-colors duration-150 md:hover:bg-sky-200 active:bg-sky-200 disabled:cursor-not-allowed disabled:opacity-60",
+    "rounded-2xl bg-sky-100 py-3 text-2xl font-semibold text-sky-700 transition-colors duration-150 md:hover:bg-sky-200 active:bg-sky-200 disabled:cursor-not-allowed disabled:opacity-60",
   keypadSecondary:
-    "rounded-2xl bg-white py-3 md:py-5 text-2xl font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 md:hover:bg-slate-50 active:bg-slate-100",
+    "rounded-2xl bg-white py-3 text-2xl font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 md:hover:bg-slate-50 active:bg-slate-100",
 };
 
 const Button: React.FC<ButtonProps> = ({

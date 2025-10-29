@@ -191,7 +191,7 @@ const LogPage: React.FC = () => {
                   {["Car", "Repeats"].map((header) => (
                     <th
                       key={header}
-                      className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4"
+                      className="px-3 py-2 text-base font-semibold text-slate-600"
                     >
                       {header}
                     </th>
@@ -201,7 +201,7 @@ const LogPage: React.FC = () => {
               <tbody>
                 {leaderboard.map((item, index) => {
                   const rowClasses =
-                    "px-3 py-2 md:px-6 md:py-4 text-xl md:text-2xl text-slate-700 font-mono";
+                    "px-3 py-2 text-xl text-slate-700 font-mono";
                   return (
                     <tr key={item.car} className="even:bg-slate-50">
                       <td className={rowClasses + " w-1/2"}>{item.car}</td>
@@ -253,7 +253,7 @@ const LogPage: React.FC = () => {
                   {["Date", "Car", "Line"].map((header) => (
                     <th
                       key={header}
-                      className="px-3 py-2 text-base font-semibold text-slate-600 md:px-6 md:py-4"
+                      className="px-3 py-2 text-base font-semibold text-slate-600"
                     >
                       {header}
                     </th>
@@ -263,7 +263,7 @@ const LogPage: React.FC = () => {
               <tbody>
                 {sortedLogs.map((entry) => {
                   const rowClasses =
-                    "px-3 py-2 md:px-6 md:py-4 text-sm md:text-base text-slate-700 font-mono";
+                    "px-3 py-2 text-sm text-slate-700 font-mono";
                   const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
                   const swipeState = swipeStates.get(entryId);
                   const swipeOffset = swipeState

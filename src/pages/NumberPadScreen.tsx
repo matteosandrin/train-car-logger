@@ -47,12 +47,12 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
           loggedCarsCount={loggedCarsCount}
           repeatCarsCount={repeatCars.length}
         />
-        <div className="w-full md:w-fit self-center rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <div className="w-full self-center rounded-2xl bg-white p-4 ring-1 ring-slate-200">
           <p className="text-base text-slate-600">
             Enter the 4-digit car number.
           </p>
           <div
-            className="flex justify-center gap-3 mt-4 md:gap-4 text-3xl tracking-[0.24em]"
+            className="flex justify-center gap-3 mt-4 text-3xl tracking-[0.24em]"
             aria-label="car number"
           >
             {Array.from({ length: MAX_LENGTH }).map((_, index) => (
@@ -66,7 +66,7 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-3 gap-3 md:gap-4">
+        <div className="grid w-full grid-cols-3 gap-3">
           {keypadDigits.map((digit) => (
             <Button
               key={digit}

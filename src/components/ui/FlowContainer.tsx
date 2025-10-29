@@ -7,7 +7,7 @@ const FlowContainer: React.FC<FlowContainerProps> = ({
   ...props
 }) => {
   const composedClassName = [
-    "flex w-full max-w-[440px] flex-col items-center gap-6 text-center",
+    "flex w-full flex-col items-center gap-6 text-center",
     className,
   ]
     .filter(Boolean)
