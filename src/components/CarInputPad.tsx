@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Button from "./ui/Button";
 import FlowContainer from "./ui/FlowContainer";
+import { calculateTrainStats } from "../utils/stats";
+import { useLogsContext } from "../logs-context";
+import StatsDisplay from "./StatsDisplay";
 
 interface CarInputPadProps {
   value: string;
@@ -23,9 +26,16 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
   onConfirm,
   onSeeLog,
 }) => {
+  const { logs } = useLogsContext();
+
   if (value.length === MAX_LENGTH) {
     onConfirm();
   }
+
+  const { loggedCarsCount, repeatCars } = useMemo(
+    () => calculateTrainStats(logs),
+    [logs],
+  );
 
   return (
     <FlowContainer className="flex flex-col">
@@ -33,7 +43,11 @@ const CarInputPad: React.FC<CarInputPadProps> = ({
         <div className="flex w-full items-center justify-between gap-3">
           <h1 className="font-bold text-3xl">Train Car Logger</h1>
         </div>
-        <div className="w-full md:w-fit self-center rounded-2xl bg-white p-4 shadow-md ring-1 ring-slate-200">
+        <StatsDisplay
+          loggedCarsCount={loggedCarsCount}
+          repeatCarsCount={repeatCars.length}          
+        />
+        <div className="w-full md:w-fit self-center rounded-2xl bg-white p-4 ring-1 ring-slate-200">
           <p className="text-base text-slate-600">
             Enter the 4-digit car number.
           </p>
