@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import Button from "./ui/Button";
-import FlowContainer from "./ui/FlowContainer";
+import Button from "../components/ui/Button";
+import FlowContainer from "../components/ui/FlowContainer";
 import { calculateTrainStats } from "../utils/stats";
 import { useLogsContext } from "../logs-context";
-import StatsDisplay from "./ui/StatsDisplay";
+import StatsDisplay from "../components/ui/StatsDisplay";
 
 interface NumberPadScreenProps {
   value: string;
@@ -45,7 +45,7 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
         </div>
         <StatsDisplay
           loggedCarsCount={loggedCarsCount}
-          repeatCarsCount={repeatCars.length}          
+          repeatCarsCount={repeatCars.length}
         />
         <div className="w-full md:w-fit self-center rounded-2xl bg-white p-4 ring-1 ring-slate-200">
           <p className="text-base text-slate-600">

@@ -1,6 +1,6 @@
 import React from "react";
-import Button from "./ui/Button";
-import FlowContainer from "./ui/FlowContainer";
+import Button from "../components/ui/Button";
+import FlowContainer from "../components/ui/FlowContainer";
 import { assetUrl } from "../assets";
 
 interface ConfirmationScreenProps {

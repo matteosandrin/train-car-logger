@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NumberPadScreen from "../components/NumberPadScreen";
-import LinePickerScreen from "../components/LinePickerScreen";
-import ConfirmationScreen from "../components/ConfirmationScreen";
+import NumberPadScreen from "./NumberPadScreen";
+import LinePickerScreen from "./LinePickerScreen";
+import ConfirmationScreen from "./ConfirmationScreen";
 import { useLogsContext } from "../logs-context";
 
 type Step = "input" | "line" | "confirm";
