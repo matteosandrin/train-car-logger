@@ -343,11 +343,25 @@ const LogPage: React.FC = () => {
                         {new Date(entry.timestamp).toLocaleString()}
                       </td>
                       <td className={rowClasses}>{entry.car}</td>
-                      <td className={rowClasses}>
+                      <td className={rowClasses + " relative"}>
                         <img
                           className="w-8 aspect-square"
                           src={assetUrl(`/img/${entry.line}.svg`)}
                         />
+                        {/* add a red background when doing swipe to delete */}
+                        {swipeOffset < 0 && (
+                          <div
+                            className="absolute inset-y-0 bg-red-500 -z-10 flex items-center"
+                            style={{
+                              left: "100%",
+                              width: "200vw",
+                            }}
+                          >
+                            <div className="text-xl font-semibold text-white ml-3 font-sans">
+                              ⌫
+                            </div>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
