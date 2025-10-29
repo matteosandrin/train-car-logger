@@ -219,7 +219,7 @@ const LogPage: React.FC = () => {
 
       <div className="grid gap-4 grid-cols-2 text-center">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-          <p className="text-xs font-medium text-slate-500">TOTAL CARS</p>
+          <p className="text-xs font-medium text-slate-500">LOGGED CARS</p>
           <p className="text-3xl font-semibold text-slate-900">
             {totalLoggedCars}
           </p>
