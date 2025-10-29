@@ -6,6 +6,7 @@ import { assetUrl } from "../assets";
 import ConfettiExplosion from "../components/ConfettiExplosion";
 import RepeatExplosion from "../components/RepeatExplosion";
 import StatsDisplay from "../components/StatsDisplay";
+import { calculateTrainStats } from "../utils/stats";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -34,53 +35,10 @@ const LogPage: React.FC = () => {
     [logs],
   );
 
-  const { totalLoggedCars, repeatCars, leaderboard } = useMemo(() => {
-    const carToLogEntries = new Map<string, Array<string>>();
-    const latestTimestamps = new Map<string, number>();
-
-    for (const entry of logs) {
-      if (!carToLogEntries.has(entry.car)) {
-        carToLogEntries.set(entry.car, []);
-      }
-      carToLogEntries.get(entry.car)?.push(entry.line);
-      const currentLatest = latestTimestamps.get(entry.car) ?? 0;
-      if (entry.timestamp > currentLatest) {
-        latestTimestamps.set(entry.car, entry.timestamp);
-      }
-    }
-
-    let repeated: string[] = [];
-    const leaderboardData: Array<{
-      car: string;
-      entries: string[];
-      latestTimestamp: number;
-    }> = [];
-
-    carToLogEntries.forEach((entries: Array<string>, car: string) => {
-      if (entries.length > 1) {
-        repeated.push(car);
-        leaderboardData.push({
-          car,
-          // reverse chronological order
-          entries: [...entries].reverse(),
-          latestTimestamp: latestTimestamps.get(car) ?? 0,
-        });
-      }
-    });
-
-    leaderboardData.sort((a, b) => {
-      if (b.entries.length !== a.entries.length) {
-        return b.entries.length - a.entries.length;
-      }
-      return b.latestTimestamp - a.latestTimestamp;
-    });
-
-    return {
-      totalLoggedCars: logs.length,
-      repeatCars: repeated,
-      leaderboard: leaderboardData,
-    };
-  }, [logs]);
+  const { loggedCarsCount, repeatCars, leaderboard } = useMemo(
+    () => calculateTrainStats(logs),
+    [logs],
+  );
 
   useEffect(() => {
     const locationState = location.state as LogLocationState | undefined;
@@ -219,7 +177,7 @@ const LogPage: React.FC = () => {
       </div>
 
       <StatsDisplay
-        loggedCarsCount={totalLoggedCars}
+        loggedCarsCount={loggedCarsCount}
         repeatCarsCount={repeatCars.length}
       />
 

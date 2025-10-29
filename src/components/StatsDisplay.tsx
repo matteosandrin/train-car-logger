@@ -20,7 +20,7 @@ const StatsDisplay: React.FC<StatsDisplayProps> = ({
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-xs font-medium text-slate-500">REPEAT CARS</p>
         <p className="text-3xl font-semibold text-slate-900">
-          {repeatCarsCount > 0 ? repeatCarsCount : "–"}
+          {repeatCarsCount}
         </p>
       </div>
     </div>
