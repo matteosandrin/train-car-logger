@@ -216,14 +216,6 @@ const LogPage: React.FC = () => {
           Home
         </span>
       </div>
-      <div>
-        <p className="text-base text-slate-600">
-          Entries are stored on this device and ordered by most recent first.
-        </p>
-        <p className="text-base text-slate-600 mt-2">
-          Swipe left to delete a row.
-        </p>
-      </div>
 
       <div className="grid gap-4 grid-cols-2 text-center">
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -302,6 +294,9 @@ const LogPage: React.FC = () => {
               Export JSON
             </Button>
           </div>
+          <span className="text-sm text-slate-400">
+            Swipe left on a row to delete it.
+          </span>
           <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
             <table className="min-w-full table-auto text-left">
               <thead className="bg-slate-100">
