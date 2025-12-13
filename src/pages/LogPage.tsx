@@ -29,10 +29,26 @@ const LogPage: React.FC = () => {
   const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(
     new Map(),
   );
+  const [lineFilter, setLineFilter] = useState<string | null>(null);
 
   const sortedLogs = useMemo(
     () => [...logs].sort((a, b) => b.timestamp - a.timestamp),
     [logs],
+  );
+
+  const uniqueLines = useMemo(() => {
+    const lines = [...new Set(logs.map((log) => log.line))];
+    return lines.sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
+  }, [logs]);
+
+  const filteredLogs = useMemo(
+    () =>
+      lineFilter
+        ? sortedLogs.filter((log) => log.line === lineFilter)
+        : sortedLogs,
+    [sortedLogs, lineFilter],
   );
 
   const { loggedCarsCount, repeatCars, leaderboard } = useMemo(
@@ -234,81 +250,123 @@ const LogPage: React.FC = () => {
               Export JSON
             </Button>
           </div>
+
           <span className="text-sm text-slate-400">
             Swipe left on a row to delete it.
           </span>
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <table className="min-w-full table-auto text-left">
-              <thead className="bg-slate-100">
-                <tr>
-                  {["Date", "Car", "Line"].map((header) => (
-                    <th
-                      key={header}
-                      className="px-3 py-2 text-base font-semibold text-slate-600"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sortedLogs.map((entry) => {
-                  const rowClasses =
-                    "px-3 py-2 text-sm text-slate-700 font-mono";
-                  const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
-                  const swipeState = swipeStates.get(entryId);
-                  const swipeOffset = swipeState
-                    ? Math.min(0, swipeState.currentX - swipeState.startX)
-                    : 0;
 
-                  return (
-                    <tr
-                      key={entryId}
-                      className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
-                      style={{
-                        transform: `translateX(${swipeOffset}px)`,
-                        transition: swipeState?.isDragging
-                          ? "none"
-                          : "transform 0.3s ease-out",
-                      }}
-                      onTouchStart={(event) => handleSwipeStart(event, entryId)}
-                      onTouchMove={(event) => handleSwipeMove(event, entryId)}
-                      onTouchEnd={() => handleSwipeEnd(entry, entryId)}
-                      onMouseDown={(event) => handleSwipeStart(event, entryId)}
-                      onMouseMove={(event) => handleSwipeMove(event, entryId)}
-                      onMouseUp={() => handleSwipeEnd(entry, entryId)}
-                      onMouseLeave={() => handleSwipeEnd(entry, entryId)}
-                    >
-                      <td className={rowClasses}>
-                        {new Date(entry.timestamp).toLocaleString()}
-                      </td>
-                      <td className={rowClasses}>{entry.car}</td>
-                      <td className={rowClasses + " relative"}>
-                        <img
-                          className="w-8 aspect-square"
-                          src={assetUrl(`/img/${entry.line}.svg`)}
-                        />
-                        {/* add a red background when doing swipe to delete */}
-                        {swipeOffset < 0 && (
-                          <div
-                            className="absolute inset-y-0 bg-red-500 -z-10 flex items-center"
-                            style={{
-                              left: "100%",
-                              width: "200vw",
-                            }}
-                          >
-                            <div className="text-xl font-semibold text-white ml-3 font-sans">
-                              ⌫
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="flex flex-wrap gap-2 items-center">
+            <button
+              onClick={() => setLineFilter(null)}
+              className={`px-5 h-10 rounded-full text-sm font-medium transition-colors ${
+                lineFilter === null
+                  ? "text-slate-900 bg-sky-100"
+                  : "text-slate-500 hover:bg-slate-100"
+              }`}
+            >
+              All lines
+            </button>
+            {uniqueLines.map((line) => (
+              <button
+                key={line}
+                onClick={() => setLineFilter(line)}
+                className={`rounded-full transition-all ${
+                  lineFilter === line
+                    ? "text-slate-900 bg-sky-100"
+                    : `text-slate-500 hover:bg-slate-100 ${lineFilter !== null ? "opacity-50" : ""}`
+                }`}
+              >
+                <img
+                  className="w-10 aspect-square"
+                  src={assetUrl(`/img/${line}.svg`)}
+                  alt={`Line ${line}`}
+                />
+              </button>
+            ))}
           </div>
+
+          {filteredLogs.length === 0 && lineFilter !== null ? (
+            <div className="text-center py-8 text-slate-500">
+              No entries for this line.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+              <table className="min-w-full table-auto text-left">
+                <thead className="bg-slate-100">
+                  <tr>
+                    {["Date", "Car", "Line"].map((header) => (
+                      <th
+                        key={header}
+                        className="px-3 py-2 text-base font-semibold text-slate-600"
+                      >
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLogs.map((entry) => {
+                    const rowClasses =
+                      "px-3 py-2 text-sm text-slate-700 font-mono";
+                    const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
+                    const swipeState = swipeStates.get(entryId);
+                    const swipeOffset = swipeState
+                      ? Math.min(0, swipeState.currentX - swipeState.startX)
+                      : 0;
+
+                    return (
+                      <tr
+                        key={entryId}
+                        className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
+                        style={{
+                          transform: `translateX(${swipeOffset}px)`,
+                          transition: swipeState?.isDragging
+                            ? "none"
+                            : "transform 0.3s ease-out",
+                        }}
+                        onTouchStart={(event) =>
+                          handleSwipeStart(event, entryId)
+                        }
+                        onTouchMove={(event) => handleSwipeMove(event, entryId)}
+                        onTouchEnd={() => handleSwipeEnd(entry, entryId)}
+                        onMouseDown={(event) =>
+                          handleSwipeStart(event, entryId)
+                        }
+                        onMouseMove={(event) => handleSwipeMove(event, entryId)}
+                        onMouseUp={() => handleSwipeEnd(entry, entryId)}
+                        onMouseLeave={() => handleSwipeEnd(entry, entryId)}
+                      >
+                        <td className={rowClasses}>
+                          {new Date(entry.timestamp).toLocaleString()}
+                        </td>
+                        <td className={rowClasses}>{entry.car}</td>
+                        <td className={rowClasses + " relative"}>
+                          <img
+                            className="w-8 aspect-square"
+                            src={assetUrl(`/img/${entry.line}.svg`)}
+                          />
+                          {/* add a red background when doing swipe to delete */}
+                          {swipeOffset < 0 && (
+                            <div
+                              className="absolute inset-y-0 bg-red-500 -z-10 flex items-center"
+                              style={{
+                                left: "100%",
+                                width: "200vw",
+                              }}
+                            >
+                              <div className="text-xl font-semibold text-white ml-3 font-sans">
+                                ⌫
+                              </div>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
