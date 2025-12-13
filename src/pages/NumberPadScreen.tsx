@@ -11,7 +11,6 @@ interface NumberPadScreenProps {
   onBackspace: () => void;
   onReset: () => void;
   onConfirm: () => void;
-  onSeeLog: () => void;
 }
 
 const MAX_LENGTH = 4;
@@ -24,7 +23,6 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   onBackspace,
   onReset,
   onConfirm,
-  onSeeLog,
 }) => {
   const { logs } = useLogsContext();
 
@@ -40,9 +38,6 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   return (
     <FlowContainer className="flex flex-col">
       <div className="flex-grow flex flex-col gap-6 w-full">
-        <div className="flex w-full items-center justify-between gap-3">
-          <h1 className="font-bold text-3xl">Train Car Logger</h1>
-        </div>
         <StatsDisplay
           loggedCarsCount={loggedCarsCount}
           repeatCarsCount={repeatCars.length}
@@ -92,9 +87,6 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
           </Button>
         </div>
       </div>
-      <Button variant="primary" onClick={onSeeLog}>
-        View log
-      </Button>
     </FlowContainer>
   );
 };

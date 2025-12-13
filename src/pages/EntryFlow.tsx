@@ -87,7 +87,6 @@ const EntryFlow: React.FC = () => {
       onBackspace={handleBackspace}
       onReset={resetFlow}
       onConfirm={handleConfirmNumber}
-      onSeeLog={() => navigate("/log")}
     />
   );
 };

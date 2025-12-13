@@ -166,15 +166,6 @@ const LogPage: React.FC = () => {
           repeatNumber={repeatNum}
         />
       )}
-      <div className="flex items-center justify-between">
-        <Button variant="pill" onClick={() => navigate("/")} className="">
-          Home
-        </Button>
-        <h1 className="text-2xl font-semibold">Train Log</h1>
-        <span aria-hidden="true" className="invisible w-20">
-          Home
-        </span>
-      </div>
 
       <StatsDisplay
         loggedCarsCount={loggedCarsCount}
@@ -234,7 +225,7 @@ const LogPage: React.FC = () => {
       ) : (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Full Log</h2>
+            <h2 className="text-xl font-semibold">History</h2>
             <Button
               variant="pill"
               onClick={handleExport}
