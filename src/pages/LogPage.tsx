@@ -7,6 +7,7 @@ import ConfettiExplosion from "../components/ConfettiExplosion";
 import RepeatExplosion from "../components/RepeatExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
+import { LuChevronDown } from "react-icons/lu";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -30,6 +31,7 @@ const LogPage: React.FC = () => {
     new Map(),
   );
   const [lineFilter, setLineFilter] = useState<string | null>(null);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const sortedLogs = useMemo(
     () => [...logs].sort((a, b) => b.timestamp - a.timestamp),
@@ -255,34 +257,67 @@ const LogPage: React.FC = () => {
             Swipe left on a row to delete it.
           </span>
 
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="rounded-xl overflow-hidden shadow-sm ring-1 ring-slate-200">
             <button
-              onClick={() => setLineFilter(null)}
-              className={`px-5 h-10 rounded-full text-sm font-medium transition-colors ${
-                lineFilter === null
-                  ? "text-slate-900 bg-sky-100"
-                  : "text-slate-500 hover:bg-slate-100"
+              onClick={() => setFiltersExpanded(!filtersExpanded)}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-900"
+            >
+              <span className="flex items-center gap-2">
+                Filter by line
+                {lineFilter !== null && (
+                  <span>
+                    <img
+                      className="w-4 h-4"
+                      src={assetUrl(`/img/${lineFilter}.svg`)}
+                      alt={`Line ${lineFilter}`}
+                    />
+                  </span>
+                )}
+              </span>
+              <LuChevronDown
+                className={`w-5 h-5 transition-transform duration-200 ${filtersExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <div
+              className={`grid transition-all duration-200 ease-in-out ${
+                filtersExpanded
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
               }`}
             >
-              All lines
-            </button>
-            {uniqueLines.map((line) => (
-              <button
-                key={line}
-                onClick={() => setLineFilter(line)}
-                className={`rounded-full transition-all ${
-                  lineFilter === line
-                    ? "text-slate-900 bg-sky-100"
-                    : `text-slate-500 hover:bg-slate-100 ${lineFilter !== null ? "opacity-50" : ""}`
-                }`}
-              >
-                <img
-                  className="w-10 aspect-square"
-                  src={assetUrl(`/img/${line}.svg`)}
-                  alt={`Line ${line}`}
-                />
-              </button>
-            ))}
+              <div className="overflow-hidden">
+                <div className="flex flex-wrap gap-2 items-center px-4 pb-4">
+                  <button
+                    onClick={() => setLineFilter(null)}
+                    className={`px-5 h-10 rounded-full text-sm font-medium transition-colors ${
+                      lineFilter === null
+                        ? "text-slate-900 bg-sky-100"
+                        : "text-slate-500 hover:bg-slate-200"
+                    }`}
+                  >
+                    All lines
+                  </button>
+                  {uniqueLines.map((line) => (
+                    <button
+                      key={line}
+                      onClick={() => setLineFilter(line)}
+                      className={`rounded-full transition-all ${
+                        lineFilter === line
+                          ? "text-slate-900 bg-sky-100"
+                          : `text-slate-500 hover:bg-slate-200 ${lineFilter !== null ? "opacity-50" : ""}`
+                      }`}
+                    >
+                      <img
+                        className="w-10 aspect-square"
+                        src={assetUrl(`/img/${line}.svg`)}
+                        alt={`Line ${line}`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           {filteredLogs.length === 0 && lineFilter !== null ? (
