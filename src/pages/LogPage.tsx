@@ -67,8 +67,7 @@ const LogPage: React.FC = () => {
   const uniqueLines = useMemo(() => {
     const lines = [...new Set(logs.map((log) => log.line))];
     return lines.sort(
-      (a, b) =>
-        FILTER_SORTED_LINES.indexOf(a) - FILTER_SORTED_LINES.indexOf(b)
+      (a, b) => FILTER_SORTED_LINES.indexOf(a) - FILTER_SORTED_LINES.indexOf(b),
     );
   }, [logs]);
 
