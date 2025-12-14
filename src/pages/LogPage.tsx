@@ -313,10 +313,10 @@ const LogPage: React.FC = () => {
               }`}
             >
               <div className="overflow-hidden">
-                <div className="flex flex-wrap gap-2 items-center px-4 pb-4">
+                <div className="grid grid-cols-7 gap-2 px-4 pb-4">
                   <button
                     onClick={() => setLineFilter(null)}
-                    className={`px-5 h-10 rounded-full text-sm font-medium transition-colors ${
+                    className={`px-2 h-full rounded-full text-sm font-medium transition-colors col-span-2 ${
                       lineFilter === null
                         ? "text-slate-900 bg-sky-100"
                         : "text-slate-500 hover:bg-slate-200"
@@ -335,7 +335,7 @@ const LogPage: React.FC = () => {
                       }`}
                     >
                       <img
-                        className="w-10 aspect-square"
+                        className="w-full aspect-square"
                         src={assetUrl(`/img/${line}.svg`)}
                         alt={`Line ${line}`}
                       />
