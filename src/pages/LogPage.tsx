@@ -7,7 +7,12 @@ import ConfettiExplosion from "../components/ConfettiExplosion";
 import RepeatExplosion from "../components/RepeatExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
-import { LuChevronDown } from "react-icons/lu";
+import {
+  LuChevronDown,
+  LuArrowUpDown,
+  LuArrowUp,
+  LuArrowDown,
+} from "react-icons/lu";
 
 const FILTER_SORTED_LINES = [
   "1",
@@ -46,6 +51,18 @@ type SwipeState = {
   isDragging: boolean;
 };
 
+const formatTimestamp = (timestamp: number) => {
+  const localeString = new Date(timestamp).toLocaleString(undefined, {
+    year: "2-digit",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  return localeString.replace(",", "");
+};
+
 const LogPage: React.FC = () => {
   const { logs, removeLog } = useLogsContext();
   const navigate = useNavigate();
@@ -58,11 +75,27 @@ const LogPage: React.FC = () => {
   );
   const [lineFilter, setLineFilter] = useState<string | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(null);
 
-  const sortedLogs = useMemo(
-    () => [...logs].sort((a, b) => b.timestamp - a.timestamp),
-    [logs],
-  );
+  const toggleCarSort = useCallback(() => {
+    setCarSortOrder((prev) => {
+      if (prev === null) return "asc";
+      if (prev === "asc") return "desc";
+      return null;
+    });
+  }, []);
+
+  const sortedLogs = useMemo(() => {
+    const sorted = [...logs];
+    if (carSortOrder === "asc") {
+      sorted.sort((a, b) => parseInt(a.car, 10) - parseInt(b.car, 10));
+    } else if (carSortOrder === "desc") {
+      sorted.sort((a, b) => parseInt(b.car, 10) - parseInt(a.car, 10));
+    } else {
+      sorted.sort((a, b) => b.timestamp - a.timestamp);
+    }
+    return sorted;
+  }, [logs, carSortOrder]);
 
   const uniqueLines = useMemo(() => {
     const lines = [...new Set(logs.map((log) => log.line))];
@@ -355,20 +388,35 @@ const LogPage: React.FC = () => {
               <table className="min-w-full table-auto text-left">
                 <thead className="bg-slate-100">
                   <tr>
-                    {["Date", "Car", "Line"].map((header) => (
-                      <th
-                        key={header}
-                        className="px-3 py-2 text-base font-semibold text-slate-600"
+                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
+                      Date
+                    </th>
+                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
+                      <button
+                        onClick={toggleCarSort}
+                        className="flex items-center gap-2 hover:text-slate-900 transition-colors"
                       >
-                        {header}
-                      </th>
-                    ))}
+                        Car
+                        {carSortOrder === null && (
+                          <LuArrowUpDown className="w-4 h-4 text-slate-400" />
+                        )}
+                        {carSortOrder === "asc" && (
+                          <LuArrowUp className="w-4 h-4 text-slate-400" />
+                        )}
+                        {carSortOrder === "desc" && (
+                          <LuArrowDown className="w-4 h-4 text-slate-400" />
+                        )}
+                      </button>
+                    </th>
+                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
+                      Line
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredLogs.map((entry) => {
                     const rowClasses =
-                      "px-3 py-2 text-sm text-slate-700 font-mono";
+                      "pl-3 pr-1 py-2 text-sm text-slate-700 font-mono";
                     const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
                     const swipeState = swipeStates.get(entryId);
                     const swipeOffset = swipeState
@@ -398,7 +446,7 @@ const LogPage: React.FC = () => {
                         onMouseLeave={() => handleSwipeEnd(entry, entryId)}
                       >
                         <td className={rowClasses}>
-                          {new Date(entry.timestamp).toLocaleString()}
+                          {formatTimestamp(entry.timestamp)}
                         </td>
                         <td className={rowClasses}>{entry.car}</td>
                         <td className={rowClasses + " relative"}>
