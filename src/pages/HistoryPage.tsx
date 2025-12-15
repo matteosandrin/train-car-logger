@@ -63,7 +63,7 @@ const formatTimestamp = (timestamp: number) => {
   return localeString.replace(",", "");
 };
 
-const LogPage: React.FC = () => {
+const HistoryPage: React.FC = () => {
   const { logs, removeLog } = useLogsContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -482,4 +482,4 @@ const LogPage: React.FC = () => {
   );
 };
 
-export default LogPage;
+export default HistoryPage;

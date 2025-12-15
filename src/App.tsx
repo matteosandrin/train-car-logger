@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import EntryFlow from "./pages/EntryFlow";
-import LogPage from "./pages/LogPage";
+import HistoryPage from "./pages/HistoryPage";
 import TaskBar from "./components/ui/TaskBar";
 
 const App: React.FC = () => {
@@ -10,7 +10,7 @@ const App: React.FC = () => {
       <div className="flex flex-1 items-stretch justify-center px-6 pb-[9rem] pt-6">
         <Routes>
           <Route path="/" element={<EntryFlow />} />
-          <Route path="/log" element={<LogPage />} />
+          <Route path="/history" element={<HistoryPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

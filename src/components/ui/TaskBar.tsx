@@ -41,8 +41,8 @@ const TaskBar: React.FC = () => {
           <TaskBarButton
             icon={<LuHistory className="w-full h-full" />}
             label="History"
-            isActive={location.pathname === "/log"}
-            onClick={() => navigate("/log")}
+            isActive={location.pathname === "/history"}
+            onClick={() => navigate("/history")}
           />
         </div>
       </div>
