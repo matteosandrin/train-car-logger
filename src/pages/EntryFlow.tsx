@@ -62,7 +62,6 @@ const EntryFlow: React.FC = () => {
   if (step === "line") {
     return (
       <LinePickerScreen
-        selectedLine={line}
         onSelect={handleLineSelect}
         onBack={resetFlow}
       />
