@@ -13,32 +13,7 @@ import {
   LuArrowUp,
   LuArrowDown,
 } from "react-icons/lu";
-
-const FILTER_SORTED_LINES = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "a",
-  "c",
-  "e",
-  "b",
-  "d",
-  "f",
-  "m",
-  "n",
-  "q",
-  "r",
-  "w",
-  "j",
-  "z",
-  "l",
-  "g",
-  "s",
-];
+import { SUBWAY_LINES } from "../utils/subway";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -100,7 +75,7 @@ const HistoryPage: React.FC = () => {
   const uniqueLines = useMemo(() => {
     const lines = [...new Set(logs.map((log) => log.line))];
     return lines.sort(
-      (a, b) => FILTER_SORTED_LINES.indexOf(a) - FILTER_SORTED_LINES.indexOf(b),
+      (a, b) => SUBWAY_LINES.indexOf(a) - SUBWAY_LINES.indexOf(b),
     );
   }, [logs]);
 

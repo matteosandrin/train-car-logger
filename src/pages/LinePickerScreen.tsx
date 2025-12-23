@@ -2,43 +2,16 @@ import React from "react";
 import Button from "../components/ui/Button";
 import FlowContainer from "../components/ui/FlowContainer";
 import { assetUrl } from "../assets";
-
-const LINES = [
-  "1",
-  "2",
-  "3",
-  "7",
-  "4",
-  "5",
-  "6",
-  "g",
-  "a",
-  "c",
-  "e",
-  "l",
-  "b",
-  "d",
-  "f",
-  "m",
-  "n",
-  "q",
-  "r",
-  "w",
-  "j",
-  "z",
-  "s",
-];
+import { PICKER_LINES } from "../utils/subway";
 
 interface LinePickerScreenProps {
   onSelect: (line: string) => void;
   onBack: () => void;
-  selectedLine?: string | null;
 }
 
 const LinePickerScreen: React.FC<LinePickerScreenProps> = ({
   onSelect,
   onBack,
-  selectedLine,
 }) => {
   return (
     <FlowContainer>
@@ -55,7 +28,7 @@ const LinePickerScreen: React.FC<LinePickerScreenProps> = ({
       <p className="text-base text-slate-600">Pick the line you rode on.</p>
 
       <div className="grid w-full grid-cols-4 gap-4">
-        {LINES.map((line) => (
+        {PICKER_LINES.map((line) => (
           <button
             key={line}
             type="button"

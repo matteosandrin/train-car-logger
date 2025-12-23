@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { assetUrl } from "../assets";
+import { SUBWAY_LINES } from "../utils/subway";
 
 type RepeatExplosionProps = {
   duration?: number;
@@ -15,31 +16,6 @@ type ParticleStyle = React.CSSProperties & {
   "--particle-scale": string;
   "--particle-rotation": string;
 };
-
-// All available subway line icons
-const SUBWAY_LINES = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "a",
-  "d",
-  "e",
-  "f",
-  "g",
-  "j",
-  "l",
-  "m",
-  "n",
-  "q",
-  "r",
-  "s",
-  "w",
-  "z",
-];
 
 const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
   repeatNumber,
