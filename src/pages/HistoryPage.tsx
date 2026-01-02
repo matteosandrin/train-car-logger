@@ -51,6 +51,7 @@ const HistoryPage: React.FC = () => {
   const [lineFilter, setLineFilter] = useState<string | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
 
   const toggleCarSort = useCallback(() => {
     setCarSortOrder((prev) => {
@@ -242,7 +243,10 @@ const HistoryPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.map((item, index) => {
+                {(leaderboardExpanded
+                  ? leaderboard
+                  : leaderboard.slice(0, 3)
+                ).map((item) => {
                   const rowClasses =
                     "px-3 py-2 text-xl text-slate-700 font-mono";
                   return (
@@ -266,6 +270,24 @@ const HistoryPage: React.FC = () => {
                 })}
               </tbody>
             </table>
+            {leaderboard.length > 3 && (
+              <button
+                onClick={() => setLeaderboardExpanded(!leaderboardExpanded)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors border-t border-slate-200"
+              >
+                {leaderboardExpanded ? (
+                  <>
+                    Show less
+                    <LuChevronDown className="w-4 h-4 rotate-180" />
+                  </>
+                ) : (
+                  <>
+                    Show {leaderboard.length - 3} more
+                    <LuChevronDown className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}
