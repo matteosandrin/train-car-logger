@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { assetUrl } from "../assets";
-import { SUBWAY_LINES } from "../utils/subway";
+import { assetUrl } from "../../assets";
+import { SUBWAY_LINES } from "../../utils/subway";
 
 type RepeatExplosionProps = {
   duration?: number;

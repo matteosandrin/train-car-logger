@@ -2,40 +2,18 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { useLogsContext } from "../logs-context";
-import { assetUrl } from "../assets";
-import ConfettiExplosion from "../components/ConfettiExplosion";
-import RepeatExplosion from "../components/RepeatExplosion";
+import ConfettiExplosion from "../components/effects/ConfettiExplosion";
+import RepeatExplosion from "../components/effects/RepeatExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
-import {
-  LuChevronDown,
-  LuArrowUpDown,
-  LuArrowUp,
-  LuArrowDown,
-} from "react-icons/lu";
 import { SUBWAY_LINES } from "../utils/subway";
+import LeaderboardTable from "../components/history/LeaderboardTable";
+import LineFilter from "../components/history/LineFilter";
+import HistoryTable from "../components/history/HistoryTable";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
   repeat: number;
-};
-
-type SwipeState = {
-  startX: number;
-  currentX: number;
-  isDragging: boolean;
-};
-
-const formatTimestamp = (timestamp: number) => {
-  const localeString = new Date(timestamp).toLocaleString(undefined, {
-    year: "2-digit",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-  return localeString.replace(",", "");
 };
 
 const HistoryPage: React.FC = () => {
@@ -45,13 +23,8 @@ const HistoryPage: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showRepeatExplosion, setShowRepeatExplosion] = useState(false);
   const [repeatNum, setRepeatNum] = useState(0);
-  const [swipeStates, setSwipeStates] = useState<Map<string, SwipeState>>(
-    new Map(),
-  );
   const [lineFilter, setLineFilter] = useState<string | null>(null);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(null);
-  const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
 
   const toggleCarSort = useCallback(() => {
     setCarSortOrder((prev) => {
@@ -123,65 +96,6 @@ const HistoryPage: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [location, navigate]);
 
-  const handleSwipeStart = useCallback(
-    (event: React.TouchEvent | React.MouseEvent, entryId: string) => {
-      const clientX =
-        "touches" in event ? event.touches[0].clientX : event.clientX;
-      setSwipeStates(
-        (prev) =>
-          new Map(
-            prev.set(entryId, {
-              startX: clientX,
-              currentX: clientX,
-              isDragging: true,
-            }),
-          ),
-      );
-    },
-    [],
-  );
-
-  const handleSwipeMove = useCallback(
-    (event: React.TouchEvent | React.MouseEvent, entryId: string) => {
-      const swipeState = swipeStates.get(entryId);
-      if (!swipeState?.isDragging) return;
-
-      event.preventDefault();
-      const clientX =
-        "touches" in event ? event.touches[0].clientX : event.clientX;
-      setSwipeStates(
-        (prev) =>
-          new Map(
-            prev.set(entryId, {
-              ...swipeState,
-              currentX: clientX,
-            }),
-          ),
-      );
-    },
-    [swipeStates],
-  );
-
-  const handleSwipeEnd = useCallback(
-    (entry: (typeof sortedLogs)[number], entryId: string) => {
-      const swipeState = swipeStates.get(entryId);
-      if (!swipeState?.isDragging) return;
-
-      const swipeDistance = swipeState.startX - swipeState.currentX;
-      const deleteThreshold = 150;
-
-      if (swipeDistance > deleteThreshold) {
-        removeLog(entry);
-      }
-
-      setSwipeStates((prev) => {
-        const newMap = new Map(prev);
-        newMap.delete(entryId);
-        return newMap;
-      });
-    },
-    [swipeStates, removeLog],
-  );
 
   const handleExport = useCallback(() => {
     if (sortedLogs.length === 0) {
@@ -225,72 +139,7 @@ const HistoryPage: React.FC = () => {
         repeatCarsCount={repeatCars.length}
       />
 
-      {leaderboard.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Repeat Cars</h2>
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <table className="min-w-full table-auto text-left">
-              <thead className="bg-slate-100">
-                <tr>
-                  {["Car", "Repeats"].map((header) => (
-                    <th
-                      key={header}
-                      className="px-3 py-2 text-base font-semibold text-slate-600"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(leaderboardExpanded
-                  ? leaderboard
-                  : leaderboard.slice(0, 3)
-                ).map((item) => {
-                  const rowClasses =
-                    "px-3 py-2 text-xl text-slate-700 font-mono";
-                  return (
-                    <tr key={item.car} className="even:bg-slate-50">
-                      <td className={rowClasses + " w-1/2"}>{item.car}</td>
-                      <td className={rowClasses}>
-                        <div className="grid grid-cols-3 gap-1 w-fit">
-                          {item.entries.map((line, index) => {
-                            return (
-                              <img
-                                className="w-12 aspect-square"
-                                src={assetUrl(`/img/${line}.svg`)}
-                                key={index}
-                              />
-                            );
-                          })}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {leaderboard.length > 3 && (
-              <button
-                onClick={() => setLeaderboardExpanded(!leaderboardExpanded)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors border-t border-slate-200"
-              >
-                {leaderboardExpanded ? (
-                  <>
-                    Show less
-                    <LuChevronDown className="w-4 h-4 rotate-180" />
-                  </>
-                ) : (
-                  <>
-                    Show {leaderboard.length - 3} more
-                    <LuChevronDown className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      <LeaderboardTable leaderboard={leaderboard} />
 
       {sortedLogs.length === 0 ? (
         <p className="text-slate-600">
@@ -313,165 +162,23 @@ const HistoryPage: React.FC = () => {
             Swipe left on a row to delete it.
           </span>
 
-          <div className="rounded-xl overflow-hidden shadow-sm ring-1 ring-slate-200">
-            <button
-              onClick={() => setFiltersExpanded(!filtersExpanded)}
-              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-900"
-            >
-              <span className="flex items-center gap-2">
-                Filter by line
-                {lineFilter !== null && (
-                  <span>
-                    <img
-                      className="w-4 h-4"
-                      src={assetUrl(`/img/${lineFilter}.svg`)}
-                      alt={`Line ${lineFilter}`}
-                    />
-                  </span>
-                )}
-              </span>
-              <LuChevronDown
-                className={`w-5 h-5 transition-transform duration-200 ${filtersExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            <div
-              className={`grid transition-all duration-200 ease-in-out ${
-                filtersExpanded
-                  ? "grid-rows-[1fr] opacity-100"
-                  : "grid-rows-[0fr] opacity-0"
-              }`}
-            >
-              <div className="overflow-hidden">
-                <div className="grid grid-cols-7 gap-2 px-4 pb-4">
-                  <button
-                    onClick={() => setLineFilter(null)}
-                    className={`px-2 h-full rounded-full text-sm font-medium transition-colors col-span-2 ${
-                      lineFilter === null
-                        ? "text-slate-900 bg-sky-100"
-                        : "text-slate-500 hover:bg-slate-200"
-                    }`}
-                  >
-                    All lines
-                  </button>
-                  {uniqueLines.map((line) => (
-                    <button
-                      key={line}
-                      onClick={() => setLineFilter(line)}
-                      className={`rounded-full transition-all ${
-                        lineFilter === line
-                          ? "text-slate-900 bg-sky-100"
-                          : `text-slate-500 hover:bg-slate-200 ${lineFilter !== null ? "opacity-50" : ""}`
-                      }`}
-                    >
-                      <img
-                        className="w-full aspect-square"
-                        src={assetUrl(`/img/${line}.svg`)}
-                        alt={`Line ${line}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <LineFilter
+            uniqueLines={uniqueLines}
+            lineFilter={lineFilter}
+            setLineFilter={setLineFilter}
+          />
 
           {filteredLogs.length === 0 && lineFilter !== null ? (
             <div className="text-center py-8 text-slate-500">
               No entries for this line.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-              <table className="min-w-full table-auto text-left">
-                <thead className="bg-slate-100">
-                  <tr>
-                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
-                      Date
-                    </th>
-                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
-                      <button
-                        onClick={toggleCarSort}
-                        className="flex items-center gap-2 hover:text-slate-900 transition-colors"
-                      >
-                        Car
-                        {carSortOrder === null && (
-                          <LuArrowUpDown className="w-4 h-4 text-slate-400" />
-                        )}
-                        {carSortOrder === "asc" && (
-                          <LuArrowUp className="w-4 h-4 text-slate-400" />
-                        )}
-                        {carSortOrder === "desc" && (
-                          <LuArrowDown className="w-4 h-4 text-slate-400" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="pl-3 pr-1 py-2 text-base font-semibold text-slate-600">
-                      Line
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLogs.map((entry) => {
-                    const rowClasses =
-                      "pl-3 pr-1 py-2 text-sm text-slate-700 font-mono";
-                    const entryId = `${entry.timestamp}-${entry.car}-${entry.line}`;
-                    const swipeState = swipeStates.get(entryId);
-                    const swipeOffset = swipeState
-                      ? Math.min(0, swipeState.currentX - swipeState.startX)
-                      : 0;
-
-                    return (
-                      <tr
-                        key={entryId}
-                        className={`even:bg-slate-50 transition-colors relative overflow-hidden`}
-                        style={{
-                          transform: `translateX(${swipeOffset}px)`,
-                          transition: swipeState?.isDragging
-                            ? "none"
-                            : "transform 0.3s ease-out",
-                        }}
-                        onTouchStart={(event) =>
-                          handleSwipeStart(event, entryId)
-                        }
-                        onTouchMove={(event) => handleSwipeMove(event, entryId)}
-                        onTouchEnd={() => handleSwipeEnd(entry, entryId)}
-                        onMouseDown={(event) =>
-                          handleSwipeStart(event, entryId)
-                        }
-                        onMouseMove={(event) => handleSwipeMove(event, entryId)}
-                        onMouseUp={() => handleSwipeEnd(entry, entryId)}
-                        onMouseLeave={() => handleSwipeEnd(entry, entryId)}
-                      >
-                        <td className={rowClasses}>
-                          {formatTimestamp(entry.timestamp)}
-                        </td>
-                        <td className={rowClasses}>{entry.car}</td>
-                        <td className={rowClasses + " relative"}>
-                          <img
-                            className="w-8 aspect-square"
-                            src={assetUrl(`/img/${entry.line}.svg`)}
-                          />
-                          {/* add a red background when doing swipe to delete */}
-                          {swipeOffset < 0 && (
-                            <div
-                              className="absolute inset-y-0 bg-red-500 -z-10 flex items-center"
-                              style={{
-                                left: "100%",
-                                width: "200vw",
-                              }}
-                            >
-                              <div className="text-xl font-semibold text-white ml-3 font-sans">
-                                ⌫
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <HistoryTable
+              filteredLogs={filteredLogs}
+              carSortOrder={carSortOrder}
+              toggleCarSort={toggleCarSort}
+              onDeleteEntry={removeLog}
+            />
           )}
         </div>
       )}
