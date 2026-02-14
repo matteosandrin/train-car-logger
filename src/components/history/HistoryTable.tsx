@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { LuArrowDown, LuArrowUp, LuArrowUpDown } from "react-icons/lu";
-import { TrainLogEntry } from "../../storage";
-import { assetUrl } from "../../assets";
-import { formatTimestamp } from "../../utils/formatting";
+import { TrainLogEntry } from "../../lib/storage";
+import { assetUrl } from "../../lib/assets";
+import { formatTimestamp } from "../../lib/utils/formatting";
 
 type SwipeState = {
   startX: number;

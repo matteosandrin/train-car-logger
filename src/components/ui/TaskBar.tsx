@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useRouter, usePathname } from "next/navigation";
 import { LuHash, LuHistory } from "react-icons/lu";
 
 const TaskBarButton: React.FC<{
@@ -23,8 +25,8 @@ const TaskBarButton: React.FC<{
 };
 
 const TaskBar: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 pb-safe pb-4">
@@ -32,13 +34,13 @@ const TaskBar: React.FC = () => {
         <div className="flex justify-center p-1 gap-1">
           <TaskBarButton
             icon={<LuHash className="w-full h-full" />}
-            isActive={location.pathname === "/"}
-            onClick={() => navigate("/")}
+            isActive={pathname === "/"}
+            onClick={() => router.push("/")}
           />
           <TaskBarButton
             icon={<LuHistory className="w-full h-full" />}
-            isActive={location.pathname === "/history"}
-            onClick={() => navigate("/history")}
+            isActive={pathname === "/history"}
+            onClick={() => router.push("/history")}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { TrainLogEntry } from "../storage";
+import { TrainLogEntry } from "@/lib/storage";
 
 export interface LeaderboardEntry {
   car: string;

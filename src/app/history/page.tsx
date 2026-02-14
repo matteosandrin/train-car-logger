@@ -1,30 +1,37 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import Button from "../components/ui/Button";
-import { useLogsContext } from "../logs-context";
-import ConfettiExplosion from "../components/effects/ConfettiExplosion";
-import RepeatExplosion from "../components/effects/RepeatExplosion";
-import StatsDisplay from "../components/ui/StatsDisplay";
-import { calculateTrainStats } from "../utils/stats";
-import { SUBWAY_LINES } from "../utils/subway";
-import LeaderboardTable from "../components/history/LeaderboardTable";
-import LineFilter from "../components/history/LineFilter";
-import HistoryTable from "../components/history/HistoryTable";
+"use client";
 
-type LogLocationState = {
-  fromNewEntry?: boolean;
-  repeat: number;
-};
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Button from "@/components/ui/Button";
+import { useLogsContext } from "@/providers/LogsProvider";
+import ConfettiExplosion from "@/components/effects/ConfettiExplosion";
+import RepeatExplosion from "@/components/effects/RepeatExplosion";
+import StatsDisplay from "@/components/ui/StatsDisplay";
+import { calculateTrainStats } from "@/lib/utils/stats";
+import { SUBWAY_LINES } from "@/lib/utils/subway";
+import LeaderboardTable from "@/components/history/LeaderboardTable";
+import LineFilter from "@/components/history/LineFilter";
+import HistoryTable from "@/components/history/HistoryTable";
 
-const HistoryPage: React.FC = () => {
+function HistoryPageContent() {
   const { logs, removeLog } = useLogsContext();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const processedRef = useRef(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showRepeatExplosion, setShowRepeatExplosion] = useState(false);
   const [repeatNum, setRepeatNum] = useState(0);
   const [lineFilter, setLineFilter] = useState<string | null>(null);
-  const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(
+    null,
+  );
 
   const toggleCarSort = useCallback(() => {
     setCarSortOrder((prev) => {
@@ -67,20 +74,24 @@ const HistoryPage: React.FC = () => {
   );
 
   useEffect(() => {
-    const locationState = location.state as LogLocationState | undefined;
+    const fromNewEntry = searchParams.get("fromNewEntry");
+    const repeat = searchParams.get("repeat");
 
-    if (!locationState?.fromNewEntry) {
+    if (!fromNewEntry || processedRef.current) {
       return;
     }
 
-    if (locationState.repeat > 1) {
+    processedRef.current = true;
+
+    const repeatCount = parseInt(repeat ?? "0", 10);
+
+    if (repeatCount > 1) {
       setShowRepeatExplosion(true);
-      setRepeatNum(locationState?.repeat ?? 2);
+      setRepeatNum(repeatCount);
       const timer = window.setTimeout(() => {
         setShowRepeatExplosion(false);
       }, 2800);
-      const clearedPath = `${location.pathname}${location.search}${location.hash}`;
-      navigate(clearedPath, { replace: true });
+      router.replace("/history", { scroll: false });
       return () => window.clearTimeout(timer);
     }
 
@@ -90,11 +101,10 @@ const HistoryPage: React.FC = () => {
       setShowConfetti(false);
     }, 2600);
 
-    const clearedPath = `${location.pathname}${location.search}${location.hash}`;
-    navigate(clearedPath, { replace: true });
+    router.replace("/history", { scroll: false });
 
     return () => window.clearTimeout(timer);
-  }, [location, navigate]);
+  }, [searchParams, router]);
 
 
   const handleExport = useCallback(() => {
@@ -184,6 +194,12 @@ const HistoryPage: React.FC = () => {
       )}
     </div>
   );
-};
+}
 
-export default HistoryPage;
+export default function HistoryPage() {
+  return (
+    <Suspense>
+      <HistoryPageContent />
+    </Suspense>
+  );
+}

@@ -1,7 +1,10 @@
+"use client";
+
 import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { assetUrl } from "../../assets";
-import { SUBWAY_LINES } from "../../utils/subway";
+
+import { assetUrl } from "@/lib/assets";
+import { SUBWAY_LINES } from "@/lib/utils/subway";
 
 type RepeatExplosionProps = {
   duration?: number;

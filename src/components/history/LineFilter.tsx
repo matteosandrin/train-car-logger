@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { LuChevronDown } from "react-icons/lu";
-import { assetUrl } from "../../assets";
+import { assetUrl } from "../../lib/assets";
 
 interface LineFilterProps {
   uniqueLines: string[];

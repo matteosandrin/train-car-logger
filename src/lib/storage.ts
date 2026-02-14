@@ -4,7 +4,7 @@ export interface TrainLogEntry {
   line: string;
 }
 
-const STORAGE_KEY = "train-car-logger";
+export const STORAGE_KEY = "train-car-logger";
 
 interface PersistedData {
   data: TrainLogEntry[];
@@ -20,7 +20,7 @@ function parseStoredData(raw: string | null): PersistedData {
   try {
     const parsed = JSON.parse(raw) as PersistedData;
     if (Array.isArray(parsed.data)) {
-      return { data: parsed.data }; // trust entries to be well-formed
+      return { data: parsed.data };
     }
     return emptyData;
   } catch (error) {
@@ -52,5 +52,3 @@ export function appendLog(entry: TrainLogEntry): TrainLogEntry[] {
   saveLogs(next);
   return next;
 }
-
-export { STORAGE_KEY };

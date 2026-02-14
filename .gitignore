@@ -1,3 +1,5 @@
 dist
 node_modules
 app.md
+.next
+.env*.local

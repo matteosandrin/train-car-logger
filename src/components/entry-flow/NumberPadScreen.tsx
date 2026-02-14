@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from "react";
-import Button from "../ui/Button";
-import FlowContainer from "../ui/FlowContainer";
-import { calculateTrainStats } from "../../utils/stats";
-import { useLogsContext } from "../../logs-context";
-import StatsDisplay from "../ui/StatsDisplay";
+"use client";
+
+import React, { useEffect, useMemo } from "react";
+import Button from "@/components/ui/Button";
+import FlowContainer from "@/components/ui/FlowContainer";
+import { calculateTrainStats } from "@/lib/utils/stats";
+import { useLogsContext } from "@/providers/LogsProvider";
+import StatsDisplay from "@/components/ui/StatsDisplay";
 
 interface NumberPadScreenProps {
   value: string;
@@ -29,9 +31,11 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   const { logs } = useLogsContext();
   let clearCount = 0;
 
-  if (value.length === MAX_LENGTH) {
-    onConfirm();
-  }
+  useEffect(() => {
+    if (value.length === MAX_LENGTH) {
+      onConfirm();
+    }
+  }, [value, onConfirm]);
 
   const { loggedCarsCount, repeatCars } = useMemo(
     () => calculateTrainStats(logs),

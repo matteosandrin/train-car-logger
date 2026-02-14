@@ -1,9 +1,12 @@
+"use client";
+
 import React, { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import NumberPadScreen from "../components/entry-flow/NumberPadScreen";
-import LinePickerScreen from "../components/entry-flow/LinePickerScreen";
-import ConfirmationScreen from "../components/entry-flow/ConfirmationScreen";
-import { useLogsContext } from "../logs-context";
+
+import { useRouter } from "next/navigation";
+import NumberPadScreen from "./NumberPadScreen";
+import LinePickerScreen from "./LinePickerScreen";
+import ConfirmationScreen from "./ConfirmationScreen";
+import { useLogsContext } from "@/providers/LogsProvider";
 
 type Step = "input" | "line" | "confirm";
 
@@ -12,7 +15,7 @@ const EntryFlow: React.FC = () => {
   const [carNumber, setCarNumber] = useState<string>("");
   const [line, setLine] = useState<string | null>(null);
   const { addLog, getCarCount } = useLogsContext();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const resetFlow = useCallback(() => {
     setCarNumber("");
@@ -33,11 +36,11 @@ const EntryFlow: React.FC = () => {
     setCarNumber((prev) => prev.slice(0, -1));
   };
 
-  const handleConfirmNumber = () => {
+  const handleConfirmNumber = useCallback(() => {
     if (carNumber.length === 4) {
       setStep("line");
     }
-  };
+  }, [carNumber.length]);
 
   const handleLineSelect = (selectedLine: string) => {
     setLine(selectedLine);
@@ -51,8 +54,7 @@ const EntryFlow: React.FC = () => {
 
     addLog(carNumber, line);
     const repeat = getCarCount(carNumber);
-    resetFlow();
-    navigate("/history", { state: { fromNewEntry: true, repeat } });
+    router.push(`/history?fromNewEntry=true&repeat=${repeat}`);
   };
 
   const handleCancel = () => {

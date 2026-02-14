@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useCallback,
@@ -6,7 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from "./storage";
+import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from "@/lib/storage";
 
 interface LogsContextValue {
   logs: TrainLogEntry[];
@@ -20,7 +22,11 @@ const LogsContext = createContext<LogsContextValue | undefined>(undefined);
 export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [logs, setLogs] = useState<TrainLogEntry[]>(() => loadLogs());
+  const [logs, setLogs] = useState<TrainLogEntry[]>([]);
+
+  useEffect(() => {
+    setLogs(loadLogs());
+  }, []);
 
   const addLog = useCallback(
     (car: string, line: string, timestamp?: number) => {
@@ -66,7 +72,7 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
       const newLogs = loadLogs();
       return newLogs.filter((entry) => entry.car === car).length;
     },
-    [loadLogs],
+    [],
   );
 
   useEffect(() => {
