@@ -3,3 +3,5 @@ node_modules
 app.md
 .next
 .env*.local
+public/sw*
+public/swe-worker*
