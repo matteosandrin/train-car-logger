@@ -2,6 +2,8 @@ dist
 node_modules
 app.md
 .next
+.env
 .env*.local
 public/sw*
 public/swe-worker*
+/src/generated/prisma

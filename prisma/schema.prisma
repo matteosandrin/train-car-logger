@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  username       String          @unique
+  hashedPassword String
+  displayName    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  sessions       Session[]
+  trainLogs      TrainLogEntry[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model TrainLogEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  car             String    @db.VarChar(4)
+  line            String    @db.VarChar(2)
+  timestamp       BigInt
+  clientCreatedAt BigInt
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clientCreatedAt, car, line])
+  @@index([car])
+  @@index([userId, deletedAt])
+  @@index([userId, timestamp])
+  @@map("train_log_entries")
+}
