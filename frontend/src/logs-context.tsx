@@ -1,7 +1,6 @@
 import React, {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -10,14 +9,14 @@ import { loadLogs, saveLogs, STORAGE_KEY } from "./storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { enqueue, initSyncService } from "./sync-service";
 
-interface LogsContextValue {
+export interface LogsContextValue {
   logs: TrainLogEntry[];
   addLog: (car: string, line: string, timestamp?: number) => void;
   removeLog: (entry: TrainLogEntry) => void;
   getCarCount: (car: string) => number;
 }
 
-const LogsContext = createContext<LogsContextValue | undefined>(undefined);
+export const LogsContext = createContext<LogsContextValue | undefined>(undefined);
 
 export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   children,
@@ -99,10 +98,3 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 };
 
-export function useLogsContext(): LogsContextValue {
-  const context = useContext(LogsContext);
-  if (!context) {
-    throw new Error("useLogsContext must be used within a LogsProvider");
-  }
-  return context;
-}
