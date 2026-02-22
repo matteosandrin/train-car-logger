@@ -6,7 +6,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { loadLogs, saveLogs, STORAGE_KEY, TrainLogEntry } from "./storage";
+import { loadLogs, saveLogs, STORAGE_KEY } from "./storage";
+import type { TrainLogEntry } from "@train-car-logger/shared";
 
 interface LogsContextValue {
   logs: TrainLogEntry[];
