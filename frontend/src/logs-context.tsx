@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { loadLogs, saveLogs, STORAGE_KEY } from "./storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
+import { enqueue, initSyncService } from "./sync-service";
 
 interface LogsContextValue {
   logs: TrainLogEntry[];
@@ -25,12 +26,13 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
 
   const addLog = useCallback(
     (car: string, line: string, timestamp?: number) => {
+      const nextEntry: TrainLogEntry = {
+        car,
+        line,
+        timestamp: timestamp ?? Math.floor(Date.now()),
+      };
+      enqueue(nextEntry);
       setLogs((prev) => {
-        const nextEntry: TrainLogEntry = {
-          car,
-          line,
-          timestamp: timestamp ?? Math.floor(Date.now()),
-        };
         const nextLogs = [...prev, nextEntry];
         saveLogs(nextLogs);
         return nextLogs;
@@ -69,6 +71,10 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
     },
     [loadLogs],
   );
+
+  useEffect(() => {
+    initSyncService();
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
