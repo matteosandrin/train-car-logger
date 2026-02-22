@@ -1,0 +1,9 @@
+{
+  "name": "train-car-logger",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ]
+}

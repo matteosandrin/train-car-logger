@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { LuArrowDown, LuArrowUp, LuArrowUpDown } from "react-icons/lu";
-import { TrainLogEntry } from "../../storage";
+import type { TrainLogEntry } from "@train-car-logger/shared";
 import { assetUrl } from "../../assets";
 import { formatTimestamp } from "../../utils/formatting";
 
@@ -145,7 +145,9 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
                 onMouseUp={() => handleSwipeEnd(entry, entryId)}
                 onMouseLeave={() => handleSwipeEnd(entry, entryId)}
               >
-                <td className={rowClasses}>{formatTimestamp(entry.timestamp)}</td>
+                <td className={rowClasses}>
+                  {formatTimestamp(entry.timestamp)}
+                </td>
                 <td className={rowClasses}>{entry.car}</td>
                 <td className={rowClasses + " relative"}>
                   <img

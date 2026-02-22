@@ -1,4 +1,4 @@
-import { TrainLogEntry } from "../storage";
+import type { TrainLogEntry } from "@train-car-logger/shared";
 
 export interface LeaderboardEntry {
   car: string;

@@ -1,8 +1,4 @@
-export interface TrainLogEntry {
-  timestamp: number;
-  car: string;
-  line: string;
-}
+import type { TrainLogEntry } from "@train-car-logger/shared";
 
 const STORAGE_KEY = "train-car-logger";
 
