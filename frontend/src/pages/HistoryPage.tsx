@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import { useLogsContext } from "../use-logs-context";
+import { useLogsContext } from "../storage";
 import ConfettiExplosion from "../components/effects/ConfettiExplosion";
 import RepeatExplosion from "../components/effects/RepeatExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";

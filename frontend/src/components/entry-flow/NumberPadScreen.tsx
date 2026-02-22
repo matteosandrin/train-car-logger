@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { calculateTrainStats } from "../../utils/stats";
-import { useLogsContext } from "../../use-logs-context";
+import { useLogsContext } from "../../storage";
 import StatsDisplay from "../ui/StatsDisplay";
 
 interface NumberPadScreenProps {

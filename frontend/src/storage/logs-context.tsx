@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { loadLogs, saveLogs, STORAGE_KEY } from "./storage";
+import { loadLogs, saveLogs, STORAGE_KEY } from "./local-storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { enqueue, initSyncService } from "./sync-service";
 
@@ -97,4 +97,3 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
 
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 };
-
