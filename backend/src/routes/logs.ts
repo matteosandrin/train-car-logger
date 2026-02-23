@@ -63,6 +63,47 @@ router.get("/logs", requireAuth, async (req, res) => {
   res.json({ entries: rows });
 });
 
+router.delete("/logs", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+  const { entries } = req.body as { entries: TrainLogEntry[] };
+
+  if (!Array.isArray(entries) || entries.length === 0) {
+    res.status(400).json({ error: "entries must be a non-empty array" });
+    return;
+  }
+
+  for (const e of entries) {
+    if (
+      typeof e.timestamp !== "number" ||
+      typeof e.car !== "string" ||
+      typeof e.line !== "string"
+    ) {
+      res
+        .status(400)
+        .json({ error: "each entry must have timestamp (number), car (string), line (string)" });
+      return;
+    }
+  }
+
+  let deleted = 0;
+  for (const e of entries) {
+    const result = await db
+      .delete(logEntries)
+      .where(
+        and(
+          eq(logEntries.userId, userId),
+          eq(logEntries.timestamp, e.timestamp),
+          eq(logEntries.car, e.car),
+          eq(logEntries.line, e.line),
+        )
+      )
+      .returning({ id: logEntries.id });
+    deleted += result.length;
+  }
+
+  res.json({ deleted, total: entries.length });
+});
+
 router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   const queryUserId = req.user!.userId;
 

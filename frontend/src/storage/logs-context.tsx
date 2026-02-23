@@ -8,7 +8,7 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import { loadLogs, saveLogs, STORAGE_KEY } from "./local-storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { enqueue, initSyncService, syncWithRemote } from "./sync-service";
+import { enqueue, enqueueDelete, initSyncService, syncWithRemote } from "./sync-service";
 import { useAuthContext } from "../auth";
 
 export interface LogsContextValue {
@@ -63,6 +63,9 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
       }
 
       saveLogs(nextLogs);
+      if (didRemove) {
+        enqueueDelete(entryToRemove);
+      }
       return nextLogs;
     });
   }, []);

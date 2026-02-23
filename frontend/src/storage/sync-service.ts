@@ -5,7 +5,9 @@ import { getToken } from "../auth/auth-service";
 const SYNC_QUEUE_KEY = "train-car-logger-sync-queue";
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
 
-function readQueue(): TrainLogEntry[] {
+type QueueEntry = { op: "add" | "delete"; entry: TrainLogEntry };
+
+function readQueue(): QueueEntry[] {
   try {
     const raw = localStorage.getItem(SYNC_QUEUE_KEY);
     if (!raw) return [];
@@ -16,12 +18,16 @@ function readQueue(): TrainLogEntry[] {
   }
 }
 
-function writeQueue(entries: TrainLogEntry[]): void {
+function writeQueue(entries: QueueEntry[]): void {
   localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(entries));
 }
 
 function entryKey(e: TrainLogEntry): string {
   return `${e.timestamp}|${e.car}|${e.line}`;
+}
+
+function opKey(q: QueueEntry): string {
+  return `${q.op}|${entryKey(q.entry)}`;
 }
 
 function authHeaders(): Record<string, string> {
@@ -42,9 +48,9 @@ export function enqueue(entry: TrainLogEntry): void {
   }
 
   const queue = readQueue();
-  const alreadyQueued = queue.some((e) => entryKey(e) === entryKey(entry));
-  if (!alreadyQueued) {
-    queue.push(entry);
+  const key = opKey({ op: "add", entry });
+  if (!queue.some((q) => opKey(q) === key)) {
+    queue.push({ op: "add", entry });
     writeQueue(queue);
   }
 
@@ -52,8 +58,28 @@ export function enqueue(entry: TrainLogEntry): void {
 }
 
 /**
- * Attempt to send all queued entries to the backend.
- * On success, removes the sent entries from the queue.
+ * Add an entry to the pending delete queue, then attempt to flush.
+ * Safe to call even when offline or when VITE_API_URL is not set.
+ */
+export function enqueueDelete(entry: TrainLogEntry): void {
+  if (!API_URL) {
+    console.warn("VITE_API_URL is not set, skipping sync");
+    return;
+  }
+
+  const queue = readQueue();
+  const key = opKey({ op: "delete", entry });
+  if (!queue.some((q) => opKey(q) === key)) {
+    queue.push({ op: "delete", entry });
+    writeQueue(queue);
+  }
+
+  flush();
+}
+
+/**
+ * Attempt to send all queued operations to the backend.
+ * On success, removes the processed entries from the queue.
  * On failure, leaves the queue intact for the next retry.
  */
 export async function flush(): Promise<void> {
@@ -69,27 +95,58 @@ export async function flush(): Promise<void> {
   const snapshot = readQueue();
   if (snapshot.length === 0) return;
 
-  console.log(`[sync] Flushing ${snapshot.length} queued entry/entries`);
+  console.log(`[sync] Flushing ${snapshot.length} queued operation(s)`);
 
-  try {
-    const response = await fetch(`${API_URL}/api/logs`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ entries: snapshot }),
-    });
+  const toAdd = snapshot.filter((q) => q.op === "add").map((q) => q.entry);
+  const toDelete = snapshot.filter((q) => q.op === "delete").map((q) => q.entry);
+  const flushedKeys = new Set<string>();
 
-    if (response.ok) {
-      const sentKeys = new Set(snapshot.map(entryKey));
-      const remaining = readQueue().filter((e) => !sentKeys.has(entryKey(e)));
-      writeQueue(remaining);
-      console.log(`[sync] Flush complete — ${snapshot.length} entry/entries uploaded`);
-    } else if (response.status === 401) {
-      console.warn("[sync] Flush failed — not authenticated");
-    } else {
-      console.warn(`[sync] Flush failed — server responded ${response.status}`);
+  if (toAdd.length > 0) {
+    try {
+      const response = await fetch(`${API_URL}/api/logs`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ entries: toAdd }),
+      });
+
+      if (response.ok) {
+        toAdd.forEach((e) => flushedKeys.add(opKey({ op: "add", entry: e })));
+        console.log(`[sync] Uploaded ${toAdd.length} entry/entries`);
+      } else if (response.status === 401) {
+        console.warn("[sync] Upload failed — not authenticated");
+      } else {
+        console.warn(`[sync] Upload failed — server responded ${response.status}`);
+      }
+    } catch (err) {
+      console.warn("[sync] Upload failed — network error", err);
     }
-  } catch (err) {
-    console.warn("[sync] Flush failed — network error", err);
+  }
+
+  if (toDelete.length > 0) {
+    try {
+      const response = await fetch(`${API_URL}/api/logs`, {
+        method: "DELETE",
+        headers: authHeaders(),
+        body: JSON.stringify({ entries: toDelete }),
+      });
+
+      if (response.ok) {
+        toDelete.forEach((e) => flushedKeys.add(opKey({ op: "delete", entry: e })));
+        console.log(`[sync] Deleted ${toDelete.length} entry/entries`);
+      } else if (response.status === 401) {
+        console.warn("[sync] Delete failed — not authenticated");
+      } else {
+        console.warn(`[sync] Delete failed — server responded ${response.status}`);
+      }
+    } catch (err) {
+      console.warn("[sync] Delete failed — network error", err);
+    }
+  }
+
+  if (flushedKeys.size > 0) {
+    const remaining = readQueue().filter((q) => !flushedKeys.has(opKey(q)));
+    writeQueue(remaining);
+    console.log(`[sync] Flush complete — ${flushedKeys.size} operation(s) processed`);
   }
 }
 
