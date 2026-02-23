@@ -1,9 +1,11 @@
+import type { TrainLogEntry } from "@train-car-logger/shared";
+import { and, desc, eq, isNotNull, ne } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { Router } from "express";
-import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { logEntries } from "../db/schema";
-import type { TrainLogEntry } from "@train-car-logger/shared";
 import { requireAuth } from "../middleware/auth";
+
 
 const router = Router();
 
@@ -59,6 +61,38 @@ router.get("/logs", requireAuth, async (req, res) => {
     .orderBy(desc(logEntries.timestamp));
 
   res.json({ entries: rows });
+});
+
+router.get("/logs/shared-cars", requireAuth, async (req, res) => {
+  const queryUserId = req.user!.userId;
+
+  const other = alias(logEntries, "other");
+
+  const rows = await db
+    .selectDistinct({
+      car: logEntries.car,
+      sharedWithUserId: other.userId,
+    })
+    .from(logEntries)
+    .innerJoin(
+      other,
+      and(
+        eq(logEntries.car, other.car),
+        ne(other.userId, queryUserId),
+        isNotNull(other.userId)
+      )
+    )
+    .where(eq(logEntries.userId, queryUserId));
+
+  const grouped: Record<string, number[]> = {};
+  for (const row of rows) {
+    if (!grouped[row.car]) grouped[row.car] = [];
+    grouped[row.car].push(row.sharedWithUserId!);
+  }
+
+  const cars = Object.entries(grouped).map(([car, sharedWith]) => ({ car, sharedWith }));
+
+  res.json({ cars });
 });
 
 export default router;
