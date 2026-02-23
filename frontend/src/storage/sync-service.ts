@@ -1,5 +1,6 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { loadLogs, saveLogs } from "./local-storage";
+import { getToken } from "../auth/auth-service";
 
 const SYNC_QUEUE_KEY = "train-car-logger-sync-queue";
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
@@ -21,6 +22,13 @@ function writeQueue(entries: TrainLogEntry[]): void {
 
 function entryKey(e: TrainLogEntry): string {
   return `${e.timestamp}|${e.car}|${e.line}`;
+}
+
+function authHeaders(): Record<string, string> {
+  const token = getToken();
+  return token
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
 }
 
 /**
@@ -66,7 +74,7 @@ export async function flush(): Promise<void> {
   try {
     const response = await fetch(`${API_URL}/api/logs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders(),
       body: JSON.stringify({ entries: snapshot }),
     });
 
@@ -75,6 +83,8 @@ export async function flush(): Promise<void> {
       const remaining = readQueue().filter((e) => !sentKeys.has(entryKey(e)));
       writeQueue(remaining);
       console.log(`[sync] Flush complete — ${snapshot.length} entry/entries uploaded`);
+    } else if (response.status === 401) {
+      console.warn("[sync] Flush failed — not authenticated");
     } else {
       console.warn(`[sync] Flush failed — server responded ${response.status}`);
     }
@@ -88,6 +98,7 @@ export async function flush(): Promise<void> {
  * - Uploads local entries missing from remote
  * - Saves remote entries missing from localStorage
  * Returns the merged local entries list.
+ * Throws an error with message "AUTH_REQUIRED" if the server returns 401.
  */
 export async function syncWithRemote(): Promise<TrainLogEntry[]> {
   if (!API_URL) {
@@ -102,7 +113,14 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
   console.log("[sync] Starting bidirectional sync...");
 
   try {
-    const res = await fetch(`${API_URL}/api/logs`);
+    const res = await fetch(`${API_URL}/api/logs`, {
+      headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+    });
+
+    if (res.status === 401) {
+      throw new Error("AUTH_REQUIRED");
+    }
+
     if (!res.ok) {
       console.warn(`[sync] Failed to fetch remote logs — server responded ${res.status}`);
       return loadLogs();
@@ -124,7 +142,7 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
       console.log(`[sync] Uploading ${toUpload.length} local entry/entries missing from remote`);
       const uploadRes = await fetch(`${API_URL}/api/logs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ entries: toUpload }),
       });
       if (uploadRes.ok) {
@@ -151,6 +169,9 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
     console.log("[sync] Sync complete — no new entries in either direction");
     return localEntries;
   } catch (err) {
+    if (err instanceof Error && err.message === "AUTH_REQUIRED") {
+      throw err;
+    }
     console.warn("[sync] Sync failed — network error", err);
     return loadLogs();
   }
