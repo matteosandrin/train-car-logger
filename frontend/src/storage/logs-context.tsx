@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { loadLogs, saveLogs, STORAGE_KEY } from "./local-storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { enqueue, initSyncService } from "./sync-service";
+import { enqueue, initSyncService, syncWithRemote } from "./sync-service";
 
 export interface LogsContextValue {
   logs: TrainLogEntry[];
@@ -73,6 +73,7 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     initSyncService();
+    syncWithRemote().then((merged) => setLogs(merged));
   }, []);
 
   useEffect(() => {
