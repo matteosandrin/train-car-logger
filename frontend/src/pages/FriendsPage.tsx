@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchSharedCars, type SharedCar } from "../api/client";
+import { fetchSharedFriends, type SharedFriend } from "../api/client";
 import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
 import Button from "../components/ui/Button";
@@ -8,7 +8,7 @@ import Button from "../components/ui/Button";
 const FriendsPage: React.FC = () => {
   const { isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
-  const [cars, setCars] = useState<SharedCar[]>([]);
+  const [friends, setFriends] = useState<SharedFriend[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,8 +18,8 @@ const FriendsPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    fetchSharedCars()
-      .then((data) => setCars(data))
+    fetchSharedFriends()
+      .then((data) => setFriends(data))
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Unknown error")
       )
@@ -45,49 +45,42 @@ const FriendsPage: React.FC = () => {
       {loading && <p className="text-slate-500">Loading…</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {!loading && !error && cars.length === 0 && (
-        <p className="text-slate-500">No shared cars yet. Log more cars to find friends!</p>
+      {!loading && !error && friends.length === 0 && (
+        <p className="text-slate-500">
+          No shared cars yet. When friends log the same cars as you, they'll appear here.
+        </p>
       )}
 
-      {!loading && !error && cars.length > 0 && (
-        <div className="space-y-3">
-          <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-            <table className="min-w-full table-auto text-left">
-              <thead className="bg-slate-100">
-                <tr>
-                  {["Car", "Shared with"].map((header) => (
-                    <th
-                      key={header}
-                      className="px-3 py-2 text-base font-semibold text-slate-600"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {cars.map((item) => (
-                  <tr key={item.car} className="even:bg-slate-50">
-                    <td className="px-3 py-2 text-xl text-slate-700 font-mono w-1/2">
-                      {item.car}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-wrap gap-1">
-                        {item.sharedWith.map((u) => (
-                          <span
-                            key={u.id}
-                            className="text-xs font-medium bg-sky-100 text-sky-800 rounded-full px-2 py-0.5"
-                          >
-                            {u.username}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
+      {!loading && !error && friends.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {friends.map((friend) => (
+            <div
+              key={friend.id}
+              className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 flex flex-col gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center text-lg font-semibold shrink-0">
+                  {friend.username[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800">{friend.username}</p>
+                  <p className="text-sm text-slate-500">
+                    {friend.cars.length} car{friend.cars.length !== 1 ? "s" : ""} in common
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {friend.cars.map((car) => (
+                  <span
+                    key={car}
+                    className="font-mono text-sm font-medium bg-slate-100 text-slate-700 rounded-lg px-2 py-1"
+                  >
+                    {car}
+                  </span>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

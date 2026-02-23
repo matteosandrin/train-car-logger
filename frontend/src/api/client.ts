@@ -2,12 +2,13 @@ import { getToken } from "../auth/auth-service";
 
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
 
-export interface SharedCar {
-  car: string;
-  sharedWith: Array<{ id: number; username: string }>;
+export interface SharedFriend {
+  id: number;
+  username: string;
+  cars: string[];
 }
 
-export async function fetchSharedCars(): Promise<SharedCar[]> {
+export async function fetchSharedFriends(): Promise<SharedFriend[]> {
   if (!API_URL) throw new Error("VITE_API_URL is not set");
   const token = getToken();
   if (!token) throw new Error("No token found");
@@ -16,6 +17,6 @@ export async function fetchSharedCars(): Promise<SharedCar[]> {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to load shared cars");
-  const data = (await res.json()) as { cars: SharedCar[] };
-  return data.cars;
+  const data = (await res.json()) as { friends: SharedFriend[] };
+  return data.friends;
 }

@@ -86,15 +86,16 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
     .innerJoin(users, eq(users.id, other.userId))
     .where(eq(logEntries.userId, queryUserId));
 
-  const grouped: Record<string, { id: number; username: string }[]> = {};
+  const grouped: Record<number, { id: number; username: string; cars: string[] }> = {};
   for (const row of rows) {
-    if (!grouped[row.car]) grouped[row.car] = [];
-    grouped[row.car].push({ id: row.sharedWithUserId!, username: row.sharedWithUsername });
+    const uid = row.sharedWithUserId!;
+    if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
+    grouped[uid].cars.push(row.car);
   }
 
-  const cars = Object.entries(grouped).map(([car, sharedWith]) => ({ car, sharedWith }));
+  const friends = Object.values(grouped);
 
-  res.json({ cars });
+  res.json({ friends });
 });
 
 export default router;
