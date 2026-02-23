@@ -3,7 +3,7 @@ import { and, desc, eq, isNotNull, ne } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Router } from "express";
 import { db } from "../db/client";
-import { logEntries } from "../db/schema";
+import { logEntries, users } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 
 
@@ -72,6 +72,7 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
     .selectDistinct({
       car: logEntries.car,
       sharedWithUserId: other.userId,
+      sharedWithUsername: users.username,
     })
     .from(logEntries)
     .innerJoin(
@@ -82,12 +83,13 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
         isNotNull(other.userId)
       )
     )
+    .innerJoin(users, eq(users.id, other.userId))
     .where(eq(logEntries.userId, queryUserId));
 
-  const grouped: Record<string, number[]> = {};
+  const grouped: Record<string, { id: number; username: string }[]> = {};
   for (const row of rows) {
     if (!grouped[row.car]) grouped[row.car] = [];
-    grouped[row.car].push(row.sharedWithUserId!);
+    grouped[row.car].push({ id: row.sharedWithUserId!, username: row.sharedWithUsername });
   }
 
   const cars = Object.entries(grouped).map(([car, sharedWith]) => ({ car, sharedWith }));
