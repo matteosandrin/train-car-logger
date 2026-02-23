@@ -18,7 +18,7 @@ function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
 export interface SharedFriend {
   id: number;
   username: string;
-  cars: string[];
+  cars: { car: string; line: string }[];
 }
 
 export async function deleteLogs(entries: TrainLogEntry[]): Promise<void> {

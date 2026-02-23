@@ -112,6 +112,7 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   const rows = await db
     .select({
       car: logEntries.car,
+      line: logEntries.line,
       timestamp: logEntries.timestamp,
       sharedWithUserId: other.userId,
       sharedWithUsername: users.username,
@@ -129,11 +130,13 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
     .where(eq(logEntries.userId, queryUserId))
     .orderBy(desc(logEntries.timestamp));
 
-  const grouped: Record<number, { id: number; username: string; cars: string[] }> = {};
+  const grouped: Record<number, { id: number; username: string; cars: { car: string; line: string }[] }> = {};
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
-    if (!grouped[uid].cars.includes(row.car)) grouped[uid].cars.push(row.car);
+    if (!grouped[uid].cars.some((c) => c.car === row.car)) {
+      grouped[uid].cars.push({ car: row.car, line: row.line });
+    }
   }
 
   const friends = Object.values(grouped);

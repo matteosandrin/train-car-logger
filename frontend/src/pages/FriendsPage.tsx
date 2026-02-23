@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchSharedFriends, type SharedFriend } from "../api/client";
+import { assetUrl } from "../assets";
 import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
 import Button from "../components/ui/Button";
@@ -70,11 +71,12 @@ const FriendsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {friend.cars.map((car) => (
+                {friend.cars.map(({ car, line }) => (
                   <span
                     key={car}
-                    className="font-mono text-sm font-medium bg-slate-100 text-slate-700 rounded-lg px-2 py-1"
+                    className="font-mono text-sm font-medium bg-slate-100 text-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5"
                   >
+                    <img className="w-4 h-4" src={assetUrl(`/img/${line}.svg`)} />
                     {car}
                   </span>
                 ))}
