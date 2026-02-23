@@ -110,8 +110,9 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   const other = alias(logEntries, "other");
 
   const rows = await db
-    .selectDistinct({
+    .select({
       car: logEntries.car,
+      timestamp: logEntries.timestamp,
       sharedWithUserId: other.userId,
       sharedWithUsername: users.username,
     })
@@ -125,13 +126,14 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
       )
     )
     .innerJoin(users, eq(users.id, other.userId))
-    .where(eq(logEntries.userId, queryUserId));
+    .where(eq(logEntries.userId, queryUserId))
+    .orderBy(desc(logEntries.timestamp));
 
   const grouped: Record<number, { id: number; username: string; cars: string[] }> = {};
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
-    grouped[uid].cars.push(row.car);
+    if (!grouped[uid].cars.includes(row.car)) grouped[uid].cars.push(row.car);
   }
 
   const friends = Object.values(grouped);
