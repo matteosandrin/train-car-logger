@@ -135,7 +135,7 @@ const HistoryPage: React.FC = () => {
         />
       )}
 
-      <UserHeader />
+      <UserHeader title="History" />
 
       <StatsDisplay
         loggedCarsCount={loggedCarsCount}

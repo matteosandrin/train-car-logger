@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LuHash, LuHistory } from "react-icons/lu";
+import { LuHash, LuHistory, LuUsers } from "react-icons/lu";
 
 const TaskBarButton: React.FC<{
   icon: React.ReactNode;
@@ -10,7 +10,7 @@ const TaskBarButton: React.FC<{
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 w-[6rem] px-6 py-4 rounded-full transition-all duration-100 ${
+      className={`flex flex-col items-center gap-1 w-[5rem] px-6 py-4 rounded-full transition-all duration-100 ${
         isActive
           ? "text-slate-900 bg-sky-100"
           : "text-slate-500 hover:bg-slate-100"
@@ -39,6 +39,11 @@ const TaskBar: React.FC = () => {
             icon={<LuHistory className="w-full h-full" />}
             isActive={location.pathname === "/history"}
             onClick={() => navigate("/history")}
+          />
+          <TaskBarButton
+            icon={<LuUsers className="w-full h-full" />}
+            isActive={location.pathname === "/friends"}
+            onClick={() => navigate("/friends")}
           />
         </div>
       </div>

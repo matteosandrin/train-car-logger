@@ -1,20 +1,22 @@
 import { useAuthContext } from "../../auth/use-auth-context";
 import Button from "./Button";
+import { useNavigate } from "react-router-dom";
 
-export const UserHeader = () => {
-  const { isAuthenticated, user, logout } = useAuthContext();
+export const UserHeader = ({ title }: { title: string }) => {
+  const { isAuthenticated, logout } = useAuthContext();
+  const navigate = useNavigate();
   return (
-    <>
-      {isAuthenticated && (
-        <div className="flex justify-between items-center">
-          <div>
-            Hello, <span className="font-semibold">{user?.username}</span>!
-          </div>
-          <Button variant="pill" onClick={logout}>
-            Sign out
-          </Button>
-        </div>
+    <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-bold">{title}</h1>
+      {isAuthenticated ? (
+        <Button variant="pillSecondary" onClick={logout}>
+          Sign out
+        </Button>
+      ) : (
+        <Button variant="pill" onClick={() => navigate("/login")}>
+          Sign in
+        </Button>
       )}
-    </>
+    </div>
   );
 };

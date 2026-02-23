@@ -2,6 +2,7 @@ import React from "react";
 
 type ButtonVariant =
   | "pill"
+  | "pillSecondary"
   | "primary"
   | "secondary"
   | "keypad"
@@ -16,6 +17,8 @@ const focusRingClasses =
 
 const variantClasses: Record<ButtonVariant, string> = {
   pill: "rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-700 shadow-sm transition-all duration-150 md:hover:bg-sky-200",
+  pillSecondary:
+    "rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 md:hover:bg-slate-50 active:bg-slate-100",
   primary:
     "w-full rounded-2xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white shadow-md transition-colors duration-150 md:hover:bg-blue-700 active:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60",
   secondary:

@@ -48,7 +48,7 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   return (
     <FlowContainer className="flex flex-col">
       <div className="flex-grow flex flex-col gap-6 w-full">
-        <UserHeader />
+        <UserHeader title="Home" />
         <StatsDisplay
           loggedCarsCount={loggedCarsCount}
           repeatCarsCount={repeatCars.length}
