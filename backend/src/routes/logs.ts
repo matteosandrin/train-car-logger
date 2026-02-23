@@ -1,12 +1,14 @@
 import { Router } from "express";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { logEntries } from "../db/schema";
 import type { TrainLogEntry } from "@train-car-logger/shared";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-router.post("/logs", async (req, res) => {
+router.post("/logs", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
   const { entries } = req.body as { entries: TrainLogEntry[] };
 
   if (!Array.isArray(entries) || entries.length === 0) {
@@ -28,7 +30,7 @@ router.post("/logs", async (req, res) => {
   }
 
   const rows = entries.map((e) => ({
-    userId: null,
+    userId,
     timestamp: e.timestamp,
     car: e.car,
     line: e.line,
@@ -43,7 +45,9 @@ router.post("/logs", async (req, res) => {
   res.json({ accepted: result.length, total: entries.length });
 });
 
-router.get("/logs", async (_req, res) => {
+router.get("/logs", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+
   const rows = await db
     .select({
       timestamp: logEntries.timestamp,
@@ -51,6 +55,7 @@ router.get("/logs", async (_req, res) => {
       line: logEntries.line,
     })
     .from(logEntries)
+    .where(eq(logEntries.userId, userId))
     .orderBy(desc(logEntries.timestamp));
 
   res.json({ entries: rows });

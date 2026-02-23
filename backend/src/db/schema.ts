@@ -10,6 +10,8 @@ import {
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -24,6 +26,6 @@ export const logEntries = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    uniqEntry: uniqueIndex("uq_log_entry").on(table.timestamp, table.car, table.line),
+    uniqEntry: uniqueIndex("uq_log_entry").on(table.userId, table.timestamp, table.car, table.line),
   })
 );

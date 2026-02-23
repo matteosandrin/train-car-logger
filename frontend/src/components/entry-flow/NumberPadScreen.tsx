@@ -4,6 +4,8 @@ import FlowContainer from "../ui/FlowContainer";
 import { calculateTrainStats } from "../../utils/stats";
 import { useLogsContext } from "../../storage";
 import StatsDisplay from "../ui/StatsDisplay";
+import { useNavigate } from "react-router";
+import { useAuthContext } from "../../auth";
 
 interface NumberPadScreenProps {
   value: string;
@@ -38,9 +40,26 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
     [logs],
   );
 
+  const navigate = useNavigate();
+
+  const { isAuthenticated, user, logout } = useAuthContext();
+
   return (
     <FlowContainer className="flex flex-col">
       <div className="flex-grow flex flex-col gap-6 w-full">
+        {isAuthenticated && (
+          <div className="flex justify-between items-center">
+            <div>
+              Hello, <span className="font-semibold">{user?.username}</span>!
+            </div>
+            <Button
+              variant="pill"
+              onClick={logout}
+            >
+              Sign out
+            </Button>
+          </div>
+        )}
         <StatsDisplay
           loggedCarsCount={loggedCarsCount}
           repeatCarsCount={repeatCars.length}
@@ -103,6 +122,21 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
           <Button variant="keypadSecondary" onClick={onBackspace}>
             ⌫
           </Button>
+        </div>
+        <div>
+        {!isAuthenticated && (
+          <div>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                navigate("/login");
+              }}
+              className="w-full"
+            >
+              Sign in / Sign up
+            </Button>
+          </div>
+        )}
         </div>
       </div>
     </FlowContainer>

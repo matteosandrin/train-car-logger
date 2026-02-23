@@ -1,6 +1,7 @@
-import "dotenv/config";
+import "./config";
 import express from "express";
 import cors from "cors";
+import authRouter from "./routes/auth";
 import logsRouter from "./routes/logs";
 import usersRouter from "./routes/users";
 
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? "*" }));
 app.use(express.json());
 
+app.use("/api", authRouter);
 app.use("/api", logsRouter);
 app.use("/api", usersRouter);
 
