@@ -6,7 +6,7 @@ import ConfettiExplosion from "../components/effects/ConfettiExplosion";
 import RepeatExplosion from "../components/effects/RepeatExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
-import { SUBWAY_LINES } from "../utils/subway";
+import { SubwayLine } from "../utils/subway";
 import LeaderboardTable from "../components/history/LeaderboardTable";
 import LineFilter from "../components/history/LineFilter";
 import HistoryTable from "../components/history/HistoryTable";
@@ -50,7 +50,7 @@ const HistoryPage: React.FC = () => {
   const uniqueLines = useMemo(() => {
     const lines = [...new Set(logs.map((log) => log.line))];
     return lines.sort(
-      (a, b) => SUBWAY_LINES.indexOf(a) - SUBWAY_LINES.indexOf(b),
+      (a, b) => Object.values(SubwayLine).indexOf(a as SubwayLine) - Object.values(SubwayLine).indexOf(b as SubwayLine),
     );
   }, [logs]);
 

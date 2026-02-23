@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { assetUrl } from "../../assets";
-import { SUBWAY_LINES } from "../../utils/subway";
+import { SubwayLine } from "../../utils/subway";
 
 type RepeatExplosionProps = {
   duration?: number;
@@ -43,7 +43,7 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
       const distance = 150 + Math.random() * 200;
       const size = 32 + Math.random() * 24;
       const line =
-        SUBWAY_LINES[Math.floor(Math.random() * SUBWAY_LINES.length)];
+        Object.values(SubwayLine)[Math.floor(Math.random() * Object.values(SubwayLine).length)];
 
       return {
         id: index,
