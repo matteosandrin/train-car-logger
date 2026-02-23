@@ -10,6 +10,7 @@ import { SUBWAY_LINES } from "../utils/subway";
 import LeaderboardTable from "../components/history/LeaderboardTable";
 import LineFilter from "../components/history/LineFilter";
 import HistoryTable from "../components/history/HistoryTable";
+import { UserHeader } from "../components/ui/UserHeader";
 
 type LogLocationState = {
   fromNewEntry?: boolean;
@@ -133,6 +134,8 @@ const HistoryPage: React.FC = () => {
           repeatNumber={repeatNum}
         />
       )}
+
+      <UserHeader />
 
       <StatsDisplay
         loggedCarsCount={loggedCarsCount}

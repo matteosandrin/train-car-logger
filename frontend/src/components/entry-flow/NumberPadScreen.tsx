@@ -6,6 +6,7 @@ import { useLogsContext } from "../../storage";
 import StatsDisplay from "../ui/StatsDisplay";
 import { useNavigate } from "react-router";
 import { useAuthContext } from "../../auth";
+import { UserHeader } from "../ui/UserHeader";
 
 interface NumberPadScreenProps {
   value: string;
@@ -42,24 +43,12 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
 
   const navigate = useNavigate();
 
-  const { isAuthenticated, user, logout } = useAuthContext();
+  const { isAuthenticated } = useAuthContext();
 
   return (
     <FlowContainer className="flex flex-col">
       <div className="flex-grow flex flex-col gap-6 w-full">
-        {isAuthenticated && (
-          <div className="flex justify-between items-center">
-            <div>
-              Hello, <span className="font-semibold">{user?.username}</span>!
-            </div>
-            <Button
-              variant="pill"
-              onClick={logout}
-            >
-              Sign out
-            </Button>
-          </div>
-        )}
+        <UserHeader />
         <StatsDisplay
           loggedCarsCount={loggedCarsCount}
           repeatCarsCount={repeatCars.length}
