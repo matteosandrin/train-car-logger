@@ -5,6 +5,21 @@ import { assetUrl } from "../assets";
 import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
 import Button from "../components/ui/Button";
+import CarExplosion from "../components/effects/CarExplosion";
+import { keys } from "../storage/local-storage";
+
+function getSeenSet(): Set<string> {
+  try {
+    const raw = localStorage.getItem(keys.SEEN_SHARED_CARS_KEY);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSeenSet(seen: Set<string>): void {
+  localStorage.setItem(keys.SEEN_SHARED_CARS_KEY, JSON.stringify([...seen]));
+}
 
 const FriendsPage: React.FC = () => {
   const { isAuthenticated } = useAuthContext();
@@ -12,6 +27,7 @@ const FriendsPage: React.FC = () => {
   const [friends, setFriends] = useState<SharedFriend[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [animationQueue, setAnimationQueue] = useState<{ line: string; friendName: string }[]>([]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -20,7 +36,32 @@ const FriendsPage: React.FC = () => {
     setError(null);
 
     fetchSharedFriends()
-      .then((data) => setFriends(data))
+      .then((data) => {
+        setFriends(data);
+
+        const isFirstVisit = localStorage.getItem(keys.SEEN_SHARED_CARS_KEY) === null;
+        const allKeys = data.flatMap((f) => f.cars.map(({ car }) => `${f.id}-${car}`));
+
+        if (isFirstVisit) {
+          saveSeenSet(new Set(allKeys));
+          return;
+        }
+
+        const seen = getSeenSet();
+        const pending: { line: string; friendName: string }[] = [];
+
+        for (const friend of data) {
+          for (const { car, line } of friend.cars) {
+            const key = `${friend.id}-${car}`;
+            if (!seen.has(key)) {
+              pending.push({ line, friendName: friend.username });
+              seen.add(key);
+            }
+          }
+        }
+        saveSeenSet(seen);
+        if (pending.length > 0) setAnimationQueue(pending);
+      })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Unknown error")
       )
@@ -84,6 +125,15 @@ const FriendsPage: React.FC = () => {
             </div>
           ))}
         </div>
+      )}
+      {animationQueue.length > 0 && (
+        <CarExplosion
+          kind="shared"
+          key={animationQueue[0].line + animationQueue[0].friendName}
+          line={animationQueue[0].line}
+          friendName={animationQueue[0].friendName}
+          onComplete={() => setAnimationQueue((q) => q.slice(1))}
+        />
       )}
     </div>
   );

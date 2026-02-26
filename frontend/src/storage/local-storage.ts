@@ -1,6 +1,14 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
 
 const STORAGE_KEY = "train-car-logger";
+const SEEN_SHARED_CARS_KEY = "train-car-logger-seen-shared-cars";
+const SYNC_QUEUE_KEY = "train-car-logger-sync-queue";
+
+export const keys = {
+  STORAGE_KEY,
+  SEEN_SHARED_CARS_KEY,
+  SYNC_QUEUE_KEY,
+};
 
 interface PersistedData {
   data: TrainLogEntry[];

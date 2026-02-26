@@ -1,15 +1,14 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { loadLogs, saveLogs } from "./local-storage";
+import { keys, loadLogs, saveLogs } from "./local-storage";
 import { getToken } from "../auth/auth-service";
 
-const SYNC_QUEUE_KEY = "train-car-logger-sync-queue";
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
 
 type QueueEntry = { op: "add" | "delete"; entry: TrainLogEntry };
 
 function readQueue(): QueueEntry[] {
   try {
-    const raw = localStorage.getItem(SYNC_QUEUE_KEY);
+    const raw = localStorage.getItem(keys.SYNC_QUEUE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -19,7 +18,7 @@ function readQueue(): QueueEntry[] {
 }
 
 function writeQueue(entries: QueueEntry[]): void {
-  localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(entries));
+  localStorage.setItem(keys.SYNC_QUEUE_KEY, JSON.stringify(entries));
 }
 
 function entryKey(e: TrainLogEntry): string {
