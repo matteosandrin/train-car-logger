@@ -3,10 +3,12 @@ import { createPortal } from "react-dom";
 import { assetUrl } from "../../assets";
 import { SubwayLine } from "../../utils/subway";
 
-type RepeatExplosionProps = {
+type CarExplosionProps = (
+  | { kind: "repeat"; repeatNumber: number }
+  | { kind: "shared"; line: string; friendName: string }
+) & {
   duration?: number;
   particleCount?: number;
-  repeatNumber: number;
   onComplete?: () => void;
 };
 
@@ -17,33 +19,21 @@ type ParticleStyle = React.CSSProperties & {
   "--particle-rotation": string;
 };
 
-const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
-  repeatNumber,
+const CarExplosion: React.FC<CarExplosionProps> = ({
   duration = 2500,
   particleCount = 100,
   onComplete,
+  ...props
 }) => {
-  const repeatText = (() => {
-    switch (repeatNumber) {
-      case 2:
-        return "DOUBLE";
-      case 3:
-        return "TRIPLE";
-      case 4:
-        return "QUADRUPLE";
-      case 5:
-        return "QUINTUPLE";
-      default:
-        return `${repeatNumber}X`;
-    }
-  })();
   const particles = useMemo(() => {
     return Array.from({ length: particleCount }, (_, index) => {
       const angle = Math.random() * Math.PI * 2;
       const distance = 150 + Math.random() * 200;
       const size = 32 + Math.random() * 24;
       const line =
-        Object.values(SubwayLine)[Math.floor(Math.random() * Object.values(SubwayLine).length)];
+        props.kind === "shared"
+          ? props.line
+          : Object.values(SubwayLine)[Math.floor(Math.random() * Object.values(SubwayLine).length)];
 
       return {
         id: index,
@@ -56,7 +46,7 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
         delay: Math.random() * 200,
       };
     });
-  }, [particleCount]);
+  }, [particleCount, props.kind === "shared" ? props.line : null]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -68,6 +58,33 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
   if (typeof document === "undefined") {
     return null;
   }
+
+  const centerText =
+    props.kind === "repeat" ? (
+      <div
+        className="double-text absolute text-6xl font-black text-white bg-blue-600 rounded-xl px-4 py-2"
+        style={{ animationDuration: `${duration}ms` }}
+      >
+        {(() => {
+          switch (props.repeatNumber) {
+            case 2: return "DOUBLE";
+            case 3: return "TRIPLE";
+            case 4: return "QUADRUPLE";
+            case 5: return "QUINTUPLE";
+            default: return `${props.repeatNumber}X`;
+          }
+        })()}
+      </div>
+    ) : (
+      <div
+        className="double-text absolute text-2xl font-black text-white bg-blue-600 rounded-xl px-5 py-3 text-center leading-normal"
+        style={{ animationDuration: `${duration}ms` }}
+      >
+        YOU SHARED A CAR WITH
+        <br />
+        <span className="bg-white text-blue-600 px-1 py-0.5 rounded-md">{props.friendName.toUpperCase()}</span>
+      </div>
+    );
 
   return createPortal(
     <div
@@ -99,18 +116,11 @@ const RepeatExplosion: React.FC<RepeatExplosionProps> = ({
         })}
       </div>
 
-      {/* Repeat text */}
-      <div
-        className="double-text absolute text-6xl font-black text-white bg-blue-600 rounded-xl px-4 py-2"
-        style={{
-          animationDuration: `${duration}ms`,
-        }}
-      >
-        {repeatText}
-      </div>
+      {/* Center text */}
+      {centerText}
     </div>,
     document.body,
   );
 };
 
-export default RepeatExplosion;
+export default CarExplosion;

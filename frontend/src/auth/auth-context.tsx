@@ -7,6 +7,7 @@ import {
   register as apiRegister,
   type AuthUser,
 } from "./auth-service";
+import { keys } from "../storage/local-storage";
 
 export interface AuthContextValue {
   user: AuthUser | null;
@@ -37,6 +38,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const logout = useCallback(() => {
     clearSession();
+    localStorage.removeItem(keys.SEEN_SHARED_CARS_KEY);
+    localStorage.removeItem(keys.SYNC_QUEUE_KEY);
     setToken(null);
     setUser(null);
   }, []);

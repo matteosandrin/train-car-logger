@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { useLogsContext } from "../storage";
 import ConfettiExplosion from "../components/effects/ConfettiExplosion";
-import RepeatExplosion from "../components/effects/RepeatExplosion";
+import CarExplosion from "../components/effects/CarExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
 import { calculateTrainStats } from "../utils/stats";
 import { SubwayLine } from "../utils/subway";
@@ -129,9 +129,10 @@ const HistoryPage: React.FC = () => {
         <ConfettiExplosion onComplete={() => setShowConfetti(false)} />
       )}
       {showRepeatExplosion && (
-        <RepeatExplosion
-          onComplete={() => setShowRepeatExplosion(false)}
+        <CarExplosion
+          kind="repeat"
           repeatNumber={repeatNum}
+          onComplete={() => setShowRepeatExplosion(false)}
         />
       )}
 
