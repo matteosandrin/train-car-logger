@@ -68,9 +68,20 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
-          <Button variant="primary" onClick={handleDone}>
-            Done
-          </Button>
+          <div className="flex flex-row gap-2">
+            <Button
+              variant="primary"
+              onClick={handleDone}
+              className="flex-1">
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={onClose}
+              className="flex-1">
+              Close
+            </Button>
+          </div>
         </div>
       </div>
 
