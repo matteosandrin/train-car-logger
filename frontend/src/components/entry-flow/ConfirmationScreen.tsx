@@ -6,6 +6,8 @@ import { assetUrl } from "../../assets";
 interface ConfirmationScreenProps {
   carNumber: string;
   line: string;
+  note: string;
+  onNoteChange: (note: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -13,6 +15,8 @@ interface ConfirmationScreenProps {
 const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   carNumber,
   line,
+  note,
+  onNoteChange,
   onConfirm,
   onCancel,
 }) => {
@@ -35,6 +39,13 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
           <img className="mt-2 w-20 h-20" src={assetUrl(`/img/${line}.svg`)} />
         </div>
       </div>
+      <textarea
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-md text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-sky-300"
+        rows={3}
+        placeholder="Add a note..."
+        value={note}
+        onChange={(e) => onNoteChange(e.target.value)}
+      />
       <div className="flex w-full flex-col gap-3">
         <Button variant="primary" onClick={onConfirm}>
           Confirm

@@ -11,12 +11,14 @@ const EntryFlow: React.FC = () => {
   const [step, setStep] = useState<Step>("input");
   const [carNumber, setCarNumber] = useState<string>("");
   const [line, setLine] = useState<string | null>(null);
+  const [note, setNote] = useState<string>("");
   const { addLog, getCarCount } = useLogsContext();
   const navigate = useNavigate();
 
   const resetFlow = useCallback(() => {
     setCarNumber("");
     setLine(null);
+    setNote("");
     setStep("input");
   }, []);
 
@@ -68,6 +70,8 @@ const EntryFlow: React.FC = () => {
       <ConfirmationScreen
         carNumber={carNumber}
         line={line}
+        note={note}
+        onNoteChange={setNote}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

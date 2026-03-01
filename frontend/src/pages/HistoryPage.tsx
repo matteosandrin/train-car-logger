@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { useLogsContext } from "../storage";
+import type { TrainLogEntry } from "@train-car-logger/shared";
 import ConfettiExplosion from "../components/effects/ConfettiExplosion";
 import CarExplosion from "../components/effects/CarExplosion";
 import StatsDisplay from "../components/ui/StatsDisplay";
@@ -10,6 +11,7 @@ import { SubwayLine } from "../utils/subway";
 import LeaderboardTable from "../components/history/LeaderboardTable";
 import LineFilter from "../components/history/LineFilter";
 import HistoryTable from "../components/history/HistoryTable";
+import EntryDetailModal from "../components/ui/EntryDetailModal";
 import { UserHeader } from "../components/ui/UserHeader";
 
 type LogLocationState = {
@@ -26,6 +28,7 @@ const HistoryPage: React.FC = () => {
   const [repeatNum, setRepeatNum] = useState(0);
   const [lineFilter, setLineFilter] = useState<string | null>(null);
   const [carSortOrder, setCarSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<TrainLogEntry | null>(null);
 
   const toggleCarSort = useCallback(() => {
     setCarSortOrder((prev) => {
@@ -135,6 +138,13 @@ const HistoryPage: React.FC = () => {
           onComplete={() => setShowRepeatExplosion(false)}
         />
       )}
+      {selectedEntry && (
+        <EntryDetailModal
+          entry={selectedEntry}
+          onClose={() => setSelectedEntry(null)}
+          onDelete={removeLog}
+        />
+      )}
 
       <UserHeader title="History" />
 
@@ -162,10 +172,6 @@ const HistoryPage: React.FC = () => {
             </Button>
           </div>
 
-          <span className="text-sm text-slate-400">
-            Swipe left on a row to delete it.
-          </span>
-
           <LineFilter
             uniqueLines={uniqueLines}
             lineFilter={lineFilter}
@@ -181,7 +187,7 @@ const HistoryPage: React.FC = () => {
               filteredLogs={filteredLogs}
               carSortOrder={carSortOrder}
               toggleCarSort={toggleCarSort}
-              onDeleteEntry={removeLog}
+              onRowClick={setSelectedEntry}
             />
           )}
         </div>
