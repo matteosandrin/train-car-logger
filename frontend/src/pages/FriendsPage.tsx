@@ -87,9 +87,9 @@ const FriendsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {friend.cars.map(({ car, line }) => (
+                {friend.cars.map(({ id, car, line }) => (
                   <span
-                    key={car}
+                    key={id}
                     className="font-mono text-sm font-medium bg-slate-100 text-slate-700 rounded-lg px-2 py-1 flex items-center gap-1.5"
                   >
                     <img className="w-4 h-4" src={assetUrl(`/img/${line}.svg`)} />
