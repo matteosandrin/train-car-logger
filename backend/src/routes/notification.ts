@@ -8,7 +8,7 @@ import { and, eq } from "drizzle-orm";
 const router = Router();
 
 // mark notification as delivered
-router.post("/notification", requireAuth, async (req, res) => {
+router.post("/notifications", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
   const { entries } = req.body as { entries: { loggedCarId: number, friendUserId: number, } };
 

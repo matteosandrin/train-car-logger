@@ -18,7 +18,7 @@ function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
 export interface SharedFriend {
   id: number;
   username: string;
-  cars: { car: string; line: string }[];
+  cars: { id: number, car: string; line: string; notified: boolean }[];
 }
 
 export async function deleteLogs(entries: TrainLogEntry[]): Promise<void> {
@@ -35,4 +35,14 @@ export async function fetchSharedFriends(): Promise<SharedFriend[]> {
   if (!res.ok) throw new Error("Failed to load shared cars");
   const data = (await res.json()) as { friends: SharedFriend[] };
   return data.friends;
+}
+
+export async function postNotifications(entries: {friendUserId: number, loggedCarId: number}[]): Promise<{total: number}> {
+  const res = await apiFetch("/api/notifications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ entries })
+  })
+  if (!res.ok) throw new Error("Failed to set notifications")
+  return res.json()
 }
