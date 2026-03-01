@@ -221,7 +221,7 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
 
     if (toSaveLocally.length > 0 || reconciled.some((e, i) => e !== localEntries[i])) {
       const merged = [...reconciled, ...toSaveLocally].sort(
-        (a, b) => b.timestamp - a.timestamp,
+        (a, b) => a.timestamp - b.timestamp,
       );
       saveLogs(merged);
       console.log(`[sync] Sync complete — local store now has ${merged.length} entries`);

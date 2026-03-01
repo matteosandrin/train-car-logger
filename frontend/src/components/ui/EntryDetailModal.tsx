@@ -21,9 +21,9 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
     return null;
   }
 
-  const handleDone = () => {
+  const handleDone = async () => {
     if (note !== (entry.notes ?? "")) {
-      updateNote(entry, note);
+      await updateNote(entry, note);
     }
     onClose();
   };
