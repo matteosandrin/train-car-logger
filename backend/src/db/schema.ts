@@ -40,6 +40,6 @@ export const notificationsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    uniqEntry: uniqueIndex("uq_notification").on(table.userId, table.loggedCarId)
+    uniqEntry: uniqueIndex("uq_notification").on(table.userId, table.friendUserId, table.loggedCarId)
   })
 );

@@ -9,4 +9,4 @@ CREATE TABLE "notifications" (
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_friend_user_id_users_id_fk" FOREIGN KEY ("friend_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_logged_car_id_cars_id_fk" FOREIGN KEY ("logged_car_id") REFERENCES "public"."cars"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "uq_notification" ON "notifications" USING btree ("user_id","logged_car_id");
+CREATE UNIQUE INDEX "uq_notification" ON "notifications" USING btree ("user_id","friend_user_id","logged_car_id");

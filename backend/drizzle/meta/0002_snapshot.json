@@ -1,5 +1,5 @@
 {
-  "id": "11c257a9-a2ae-40e9-8b41-ebca3e4a60e6",
+  "id": "24d89658-01ab-4af1-bfbf-20af569dc94b",
   "prevId": "1721be02-0a18-4dd2-b33e-14154e1efb52",
   "version": "7",
   "dialect": "postgresql",
@@ -144,6 +144,12 @@
           "columns": [
             {
               "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "friend_user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
