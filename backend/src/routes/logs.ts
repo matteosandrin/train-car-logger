@@ -117,7 +117,7 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
       timestamp: carsTable.timestamp,
       sharedWithUserId: other.userId,
       sharedWithUsername: usersTable.username,
-      notified: sql<boolean>`${notificationsTable.id} IS NOT NULL`
+      notified: sql<boolean>`${isNotNull(notificationsTable.id)}`
     })
     .from(carsTable)
     .innerJoin(
@@ -141,7 +141,7 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
-    if (!grouped[uid].cars.some((c) => c.car === row.car)) {
+    if (!grouped[uid].cars.some((c) => c.id === row.id)) {
       grouped[uid].cars.push({ id: row.id, car: row.car, line: row.line, notified: row.notified });
     }
   }
