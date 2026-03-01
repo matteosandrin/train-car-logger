@@ -1,5 +1,5 @@
 import React from "react";
-import { LuArrowDown, LuArrowUp, LuArrowUpDown } from "react-icons/lu";
+import { LuArrowDown, LuArrowUp, LuArrowUpDown, LuMessageSquare } from "react-icons/lu";
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { assetUrl } from "../../assets";
 import { formatTimestamp } from "../../utils/formatting";
@@ -61,7 +61,12 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
                 <td className={rowClasses}>
                   {formatTimestamp(entry.timestamp)}
                 </td>
-                <td className={rowClasses}>{entry.car}</td>
+                <td className={rowClasses}>
+                  <span className="flex items-center gap-1.5">
+                    {entry.car}
+                    {entry.notes && <LuMessageSquare className="w-4 h-4 text-slate-400 shrink-0" />}
+                  </span>
+                </td>
                 <td className={rowClasses}>
                   <img
                     className="w-8 aspect-square"
