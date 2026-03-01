@@ -1,9 +1,9 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { and, desc, eq, isNotNull, ne } from "drizzle-orm";
+import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Router } from "express";
 import { db } from "../db/client";
-import { carsTable, usersTable } from "../db/schema";
+import { carsTable, notificationsTable, usersTable } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 
 
@@ -111,11 +111,13 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
 
   const rows = await db
     .select({
+      id: carsTable.id,
       car: carsTable.car,
       line: carsTable.line,
       timestamp: carsTable.timestamp,
       sharedWithUserId: other.userId,
       sharedWithUsername: usersTable.username,
+      notified: sql<boolean>`${notificationsTable.id} IS NOT NULL`
     })
     .from(carsTable)
     .innerJoin(
@@ -127,15 +129,20 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
       )
     )
     .innerJoin(usersTable, eq(usersTable.id, other.userId))
+    .leftJoin(notificationsTable, and(
+      eq(carsTable.userId, notificationsTable.userId),
+      eq(other.userId, notificationsTable.friendUserId),
+      eq(carsTable.id, notificationsTable.loggedCarId)
+    ))
     .where(eq(carsTable.userId, queryUserId))
     .orderBy(desc(carsTable.timestamp));
 
-  const grouped: Record<number, { id: number; username: string; cars: { car: string; line: string }[] }> = {};
+  const grouped: Record<number, { id: number; username: string; cars: { id: number, car: string; line: string, notified: boolean }[] }> = {};
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
     if (!grouped[uid].cars.some((c) => c.car === row.car)) {
-      grouped[uid].cars.push({ car: row.car, line: row.line });
+      grouped[uid].cars.push({ id: row.id, car: row.car, line: row.line, notified: row.notified });
     }
   }
 

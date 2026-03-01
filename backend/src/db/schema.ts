@@ -29,3 +29,17 @@ export const carsTable = pgTable(
     uniqEntry: uniqueIndex("uq_log_entry").on(table.userId, table.timestamp, table.car, table.line),
   })
 );
+
+export const notificationsTable = pgTable(
+  "notifications",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id").references(() => usersTable.id, {onDelete: "cascade"}),
+    friendUserId: integer("friend_user_id").references(() => usersTable.id, {onDelete: "cascade"}),
+    loggedCarId: integer("logged_car_id").references(() => carsTable.id, {onDelete: "cascade"}),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqEntry: uniqueIndex("uq_notification").on(table.userId, table.loggedCarId)
+  })
+);
