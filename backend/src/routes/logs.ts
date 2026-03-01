@@ -36,6 +36,7 @@ router.post("/logs", requireAuth, async (req, res) => {
     timestamp: e.timestamp,
     car: e.car,
     line: e.line,
+    notes: typeof e.notes === "string" ? e.notes : null,
   }));
 
   const result = await db
@@ -52,9 +53,11 @@ router.get("/logs", requireAuth, async (req, res) => {
 
   const rows = await db
     .select({
+      id: carsTable.id,
       timestamp: carsTable.timestamp,
       car: carsTable.car,
       line: carsTable.line,
+      notes: carsTable.notes,
     })
     .from(carsTable)
     .where(eq(carsTable.userId, userId))
@@ -102,6 +105,35 @@ router.delete("/logs", requireAuth, async (req, res) => {
   }
 
   res.json({ deleted, total: entries.length });
+});
+
+router.patch("/logs/:id", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+  const id = parseInt(req.params.id, 10);
+  const { notes } = req.body as { notes: string };
+
+  if (isNaN(id)) {
+    res.status(400).json({ error: "invalid id" });
+    return;
+  }
+
+  if (typeof notes !== "string") {
+    res.status(400).json({ error: "notes must be a string" });
+    return;
+  }
+
+  const result = await db
+    .update(carsTable)
+    .set({ notes })
+    .where(and(eq(carsTable.id, id), eq(carsTable.userId, userId)))
+    .returning({ id: carsTable.id });
+
+  if (result.length === 0) {
+    res.status(404).json({ error: "entry not found" });
+    return;
+  }
+
+  res.json({ ok: true });
 });
 
 router.get("/logs/shared-cars", requireAuth, async (req, res) => {

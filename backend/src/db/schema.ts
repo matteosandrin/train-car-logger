@@ -23,6 +23,7 @@ export const carsTable = pgTable(
     timestamp: bigint("timestamp", { mode: "number" }).notNull(),
     car: text("car").notNull(),
     line: text("line").notNull(),
+    notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
