@@ -6,7 +6,6 @@ import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
 import Button from "../components/ui/Button";
 import CarExplosion from "../components/effects/CarExplosion";
-import { keys } from "../storage/local-storage";
 
 const FriendsPage: React.FC = () => {
   const { isAuthenticated } = useAuthContext();

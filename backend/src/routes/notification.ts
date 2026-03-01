@@ -1,16 +1,14 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth";
-import { TrainLogEntry } from "@train-car-logger/shared";
-import { carsTable, notificationsTable } from "../db/schema";
+import { notificationsTable } from "../db/schema";
 import { db } from "../db/client";
-import { and, eq } from "drizzle-orm";
 
 const router = Router();
 
 // mark notification as delivered
 router.post("/notifications", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
-  const { entries } = req.body as { entries: { loggedCarId: number, friendUserId: number, } };
+  const { entries } = req.body as { entries: { loggedCarId: number, friendUserId: number }[] };
 
   if (!Array.isArray(entries) || entries.length === 0) {
     res.status(400).json({ error: "entries must be a non-empty array" });

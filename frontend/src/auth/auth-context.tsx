@@ -38,7 +38,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const logout = useCallback(() => {
     clearSession();
-    localStorage.removeItem(keys.SEEN_SHARED_CARS_KEY);
     localStorage.removeItem(keys.SYNC_QUEUE_KEY);
     setToken(null);
     setUser(null);
