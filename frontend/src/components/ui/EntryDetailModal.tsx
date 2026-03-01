@@ -4,6 +4,7 @@ import type { TrainLogEntry } from "@train-car-logger/shared";
 import { assetUrl } from "../../assets";
 import { formatTimestamp } from "../../utils/formatting";
 import Button from "./Button";
+import { useLogsContext } from "../../storage";
 
 interface EntryDetailModalProps {
   entry: TrainLogEntry;
@@ -12,12 +13,20 @@ interface EntryDetailModalProps {
 }
 
 const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onDelete }) => {
-  const [note, setNote] = useState("");
+  const { updateNote } = useLogsContext();
+  const [note, setNote] = useState(entry.notes ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   if (typeof document === "undefined") {
     return null;
   }
+
+  const handleDone = () => {
+    if (note !== (entry.notes ?? "")) {
+      updateNote(entry, note);
+    }
+    onClose();
+  };
 
   const handleDelete = () => {
     onDelete(entry);
@@ -59,7 +68,7 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
-          <Button variant="primary" onClick={onClose}>
+          <Button variant="primary" onClick={handleDone}>
             Done
           </Button>
         </div>

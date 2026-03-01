@@ -208,14 +208,20 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
       }
     }
 
-    // Remote entries missing locally → merge into localStorage
+    // Remote entries missing locally → add to merged set
     const toSaveLocally = remoteEntries.filter(
       (e) => !localKeys.has(entryKey(e)),
     );
-    if (toSaveLocally.length > 0) {
-      console.log(`[sync] Saving ${toSaveLocally.length} remote entry/entries missing locally`);
-      const merged = [...localEntries, ...toSaveLocally].sort(
-        (a, b) => a.timestamp - b.timestamp,
+
+    // Build a map of remote entries by key so we can apply server id/notes to local entries
+    const remoteByKey = new Map(remoteEntries.map((e) => [entryKey(e), e]));
+
+    // For entries that exist in both, use the remote version (has id and notes)
+    const reconciled = localEntries.map((e) => remoteByKey.get(entryKey(e)) ?? e);
+
+    if (toSaveLocally.length > 0 || reconciled.some((e, i) => e !== localEntries[i])) {
+      const merged = [...reconciled, ...toSaveLocally].sort(
+        (a, b) => b.timestamp - a.timestamp,
       );
       saveLogs(merged);
       console.log(`[sync] Sync complete — local store now has ${merged.length} entries`);

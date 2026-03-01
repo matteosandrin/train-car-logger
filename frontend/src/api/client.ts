@@ -37,6 +37,15 @@ export async function fetchSharedFriends(): Promise<SharedFriend[]> {
   return data.friends;
 }
 
+export async function updateLogNotes(id: number, notes: string): Promise<void> {
+  const res = await apiFetch(`/api/logs/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notes }),
+  });
+  if (!res.ok) throw new Error("Failed to update notes");
+}
+
 export async function postNotifications(entries: {friendUserId: number, loggedCarId: number}[]): Promise<{total: number}> {
   const res = await apiFetch("/api/notifications", {
     method: "POST",

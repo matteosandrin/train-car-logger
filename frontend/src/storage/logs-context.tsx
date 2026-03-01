@@ -9,12 +9,14 @@ import { useNavigate } from "react-router-dom";
 import { loadLogs, saveLogs, STORAGE_KEY } from "./local-storage";
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { enqueue, enqueueDelete, initSyncService, syncWithRemote } from "./sync-service";
+import { updateLogNotes } from "../api/client";
 import { useAuthContext } from "../auth";
 
 export interface LogsContextValue {
   logs: TrainLogEntry[];
-  addLog: (car: string, line: string, timestamp?: number) => void;
+  addLog: (car: string, line: string, timestamp?: number, notes?: string) => void;
   removeLog: (entry: TrainLogEntry) => void;
+  updateNote: (entry: TrainLogEntry, notes: string) => Promise<void>;
   getCarCount: (car: string) => number;
 }
 
@@ -28,11 +30,12 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   const navigate = useNavigate();
 
   const addLog = useCallback(
-    (car: string, line: string, timestamp?: number) => {
+    (car: string, line: string, timestamp?: number, notes?: string) => {
       const nextEntry: TrainLogEntry = {
         car,
         line,
         timestamp: timestamp ?? Math.floor(Date.now()),
+        notes: notes || undefined,
       };
       enqueue(nextEntry);
       setLogs((prev) => {
@@ -68,6 +71,21 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
       }
       return nextLogs;
     });
+  }, []);
+
+  const updateNote = useCallback(async (entry: TrainLogEntry, notes: string) => {
+    setLogs((prev) => {
+      const nextLogs = prev.map((e) =>
+        e.timestamp === entry.timestamp && e.car === entry.car && e.line === entry.line
+          ? { ...e, notes }
+          : e,
+      );
+      saveLogs(nextLogs);
+      return nextLogs;
+    });
+    if (entry.id) {
+      await updateLogNotes(entry.id, notes);
+    }
   }, []);
 
   const getCarCount = useCallback(
@@ -108,8 +126,8 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   }, []);
 
   const value = useMemo(
-    () => ({ logs, addLog, removeLog, getCarCount }),
-    [logs, addLog, removeLog, getCarCount],
+    () => ({ logs, addLog, removeLog, updateNote, getCarCount }),
+    [logs, addLog, removeLog, updateNote, getCarCount],
   );
 
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
