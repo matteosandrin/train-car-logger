@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { users } from "../db/schema";
+import { usersTable } from "../db/schema";
 
 const router = Router();
 const BCRYPT_ROUNDS = 12;
@@ -30,9 +30,9 @@ router.post("/auth/register", async (req, res) => {
   const trimmedUsername = username.trim().toLowerCase();
 
   const existing = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.username, trimmedUsername))
+    .select({ id: usersTable.id })
+    .from(usersTable)
+    .where(eq(usersTable.username, trimmedUsername))
     .limit(1);
 
   if (existing.length > 0) {
@@ -43,9 +43,9 @@ router.post("/auth/register", async (req, res) => {
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const [newUser] = await db
-    .insert(users)
+    .insert(usersTable)
     .values({ username: trimmedUsername, passwordHash })
-    .returning({ id: users.id, username: users.username });
+    .returning({ id: usersTable.id, username: usersTable.username });
 
   const token = signToken(newUser.id, newUser.username);
   res.status(201).json({ token, userId: newUser.id, username: newUser.username });
@@ -63,8 +63,8 @@ router.post("/auth/login", async (req, res) => {
 
   const [user] = await db
     .select()
-    .from(users)
-    .where(eq(users.username, trimmedUsername))
+    .from(usersTable)
+    .where(eq(usersTable.username, trimmedUsername))
     .limit(1);
 
   // Always run bcrypt.compare to prevent user-enumeration via timing

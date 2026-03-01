@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchSharedFriends, type SharedFriend } from "../api/client";
+import { fetchSharedFriends, postNotifications, type SharedFriend } from "../api/client";
 import { assetUrl } from "../assets";
 import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
 import Button from "../components/ui/Button";
 import CarExplosion from "../components/effects/CarExplosion";
-import { keys } from "../storage/local-storage";
-
-function getSeenSet(): Set<string> {
-  try {
-    const raw = localStorage.getItem(keys.SEEN_SHARED_CARS_KEY);
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
-  } catch {
-    return new Set();
-  }
-}
-
-function saveSeenSet(seen: Set<string>): void {
-  localStorage.setItem(keys.SEEN_SHARED_CARS_KEY, JSON.stringify([...seen]));
-}
 
 const FriendsPage: React.FC = () => {
   const { isAuthenticated } = useAuthContext();
@@ -38,29 +24,18 @@ const FriendsPage: React.FC = () => {
     fetchSharedFriends()
       .then((data) => {
         setFriends(data);
-
-        const isFirstVisit = localStorage.getItem(keys.SEEN_SHARED_CARS_KEY) === null;
-        const allKeys = data.flatMap((f) => f.cars.map(({ car }) => `${f.id}-${car}`));
-
-        if (isFirstVisit) {
-          saveSeenSet(new Set(allKeys));
-          return;
-        }
-
-        const seen = getSeenSet();
-        const pending: { line: string; friendName: string }[] = [];
-
+        const pending = [];
+        const notifications = [];
         for (const friend of data) {
-          for (const { car, line } of friend.cars) {
-            const key = `${friend.id}-${car}`;
-            if (!seen.has(key)) {
+          for (const { id, line, notified } of friend.cars) {
+            if (!notified) {
               pending.push({ line, friendName: friend.username });
-              seen.add(key);
+              notifications.push({ friendUserId: friend.id, loggedCarId: id });
             }
           }
         }
-        saveSeenSet(seen);
         if (pending.length > 0) setAnimationQueue(pending);
+        if (notifications.length > 0) postNotifications(notifications);
       })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Unknown error")

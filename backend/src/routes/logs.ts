@@ -1,9 +1,9 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { and, desc, eq, isNotNull, ne } from "drizzle-orm";
+import { and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Router } from "express";
 import { db } from "../db/client";
-import { logEntries, users } from "../db/schema";
+import { carsTable, notificationsTable, usersTable } from "../db/schema";
 import { requireAuth } from "../middleware/auth";
 
 
@@ -39,10 +39,10 @@ router.post("/logs", requireAuth, async (req, res) => {
   }));
 
   const result = await db
-    .insert(logEntries)
+    .insert(carsTable)
     .values(rows)
     .onConflictDoNothing()
-    .returning({ id: logEntries.id });
+    .returning({ id: carsTable.id });
 
   res.json({ accepted: result.length, total: entries.length });
 });
@@ -52,13 +52,13 @@ router.get("/logs", requireAuth, async (req, res) => {
 
   const rows = await db
     .select({
-      timestamp: logEntries.timestamp,
-      car: logEntries.car,
-      line: logEntries.line,
+      timestamp: carsTable.timestamp,
+      car: carsTable.car,
+      line: carsTable.line,
     })
-    .from(logEntries)
-    .where(eq(logEntries.userId, userId))
-    .orderBy(desc(logEntries.timestamp));
+    .from(carsTable)
+    .where(eq(carsTable.userId, userId))
+    .orderBy(desc(carsTable.timestamp));
 
   res.json({ entries: rows });
 });
@@ -88,16 +88,16 @@ router.delete("/logs", requireAuth, async (req, res) => {
   let deleted = 0;
   for (const e of entries) {
     const result = await db
-      .delete(logEntries)
+      .delete(carsTable)
       .where(
         and(
-          eq(logEntries.userId, userId),
-          eq(logEntries.timestamp, e.timestamp),
-          eq(logEntries.car, e.car),
-          eq(logEntries.line, e.line),
+          eq(carsTable.userId, userId),
+          eq(carsTable.timestamp, e.timestamp),
+          eq(carsTable.car, e.car),
+          eq(carsTable.line, e.line),
         )
       )
-      .returning({ id: logEntries.id });
+      .returning({ id: carsTable.id });
     deleted += result.length;
   }
 
@@ -107,35 +107,42 @@ router.delete("/logs", requireAuth, async (req, res) => {
 router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   const queryUserId = req.user!.userId;
 
-  const other = alias(logEntries, "other");
+  const other = alias(carsTable, "other");
 
   const rows = await db
     .select({
-      car: logEntries.car,
-      line: logEntries.line,
-      timestamp: logEntries.timestamp,
+      id: carsTable.id,
+      car: carsTable.car,
+      line: carsTable.line,
+      timestamp: carsTable.timestamp,
       sharedWithUserId: other.userId,
-      sharedWithUsername: users.username,
+      sharedWithUsername: usersTable.username,
+      notified: sql<boolean>`${isNotNull(notificationsTable.id)}`
     })
-    .from(logEntries)
+    .from(carsTable)
     .innerJoin(
       other,
       and(
-        eq(logEntries.car, other.car),
+        eq(carsTable.car, other.car),
         ne(other.userId, queryUserId),
         isNotNull(other.userId)
       )
     )
-    .innerJoin(users, eq(users.id, other.userId))
-    .where(eq(logEntries.userId, queryUserId))
-    .orderBy(desc(logEntries.timestamp));
+    .innerJoin(usersTable, eq(usersTable.id, other.userId))
+    .leftJoin(notificationsTable, and(
+      eq(carsTable.userId, notificationsTable.userId),
+      eq(other.userId, notificationsTable.friendUserId),
+      eq(carsTable.id, notificationsTable.loggedCarId)
+    ))
+    .where(eq(carsTable.userId, queryUserId))
+    .orderBy(desc(carsTable.timestamp));
 
-  const grouped: Record<number, { id: number; username: string; cars: { car: string; line: string }[] }> = {};
+  const grouped: Record<number, { id: number; username: string; cars: { id: number, car: string; line: string, notified: boolean }[] }> = {};
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
-    if (!grouped[uid].cars.some((c) => c.car === row.car)) {
-      grouped[uid].cars.push({ car: row.car, line: row.line });
+    if (!grouped[uid].cars.some((c) => c.id === row.id)) {
+      grouped[uid].cars.push({ id: row.id, car: row.car, line: row.line, notified: row.notified });
     }
   }
 
