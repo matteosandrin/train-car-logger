@@ -24,9 +24,8 @@ const FriendsPage: React.FC = () => {
     fetchSharedFriends()
       .then((data) => {
         setFriends(data);
-
-        const pending = []
-        const notifications = []
+        const pending = [];
+        const notifications = [];
         for (const friend of data) {
           for (const { id, line, notified } of friend.cars) {
             if (!notified) {
