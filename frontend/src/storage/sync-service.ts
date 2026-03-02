@@ -4,6 +4,9 @@ import { getToken } from "../auth/auth-service";
 
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
 
+let _flushing = false;
+let _onlineListenerRegistered = false;
+
 type QueueEntry = { op: "add" | "delete"; entry: TrainLogEntry };
 
 function readQueue(): QueueEntry[] {
@@ -82,70 +85,76 @@ export function enqueueDelete(entry: TrainLogEntry): void {
  * On failure, leaves the queue intact for the next retry.
  */
 export async function flush(): Promise<void> {
-  if (!API_URL) {
-    console.warn("[sync] VITE_API_URL is not set, skipping flush");
-    return;
-  }
-  if (!navigator.onLine) {
-    console.warn("[sync] Offline, skipping flush");
-    return;
-  }
-
-  const snapshot = readQueue();
-  if (snapshot.length === 0) return;
-
-  console.log(`[sync] Flushing ${snapshot.length} queued operation(s)`);
-
-  const toAdd = snapshot.filter((q) => q.op === "add").map((q) => q.entry);
-  const toDelete = snapshot.filter((q) => q.op === "delete").map((q) => q.entry);
-  const flushedKeys = new Set<string>();
-
-  if (toAdd.length > 0) {
-    try {
-      const response = await fetch(`${API_URL}/api/logs`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ entries: toAdd }),
-      });
-
-      if (response.ok) {
-        toAdd.forEach((e) => flushedKeys.add(opKey({ op: "add", entry: e })));
-        console.log(`[sync] Uploaded ${toAdd.length} entry/entries`);
-      } else if (response.status === 401) {
-        console.warn("[sync] Upload failed — not authenticated");
-      } else {
-        console.warn(`[sync] Upload failed — server responded ${response.status}`);
-      }
-    } catch (err) {
-      console.warn("[sync] Upload failed — network error", err);
+  if (_flushing) return;
+  _flushing = true;
+  try {
+    if (!API_URL) {
+      console.warn("[sync] VITE_API_URL is not set, skipping flush");
+      return;
     }
-  }
-
-  if (toDelete.length > 0) {
-    try {
-      const response = await fetch(`${API_URL}/api/logs`, {
-        method: "DELETE",
-        headers: authHeaders(),
-        body: JSON.stringify({ entries: toDelete }),
-      });
-
-      if (response.ok) {
-        toDelete.forEach((e) => flushedKeys.add(opKey({ op: "delete", entry: e })));
-        console.log(`[sync] Deleted ${toDelete.length} entry/entries`);
-      } else if (response.status === 401) {
-        console.warn("[sync] Delete failed — not authenticated");
-      } else {
-        console.warn(`[sync] Delete failed — server responded ${response.status}`);
-      }
-    } catch (err) {
-      console.warn("[sync] Delete failed — network error", err);
+    if (!navigator.onLine) {
+      console.warn("[sync] Offline, skipping flush");
+      return;
     }
-  }
 
-  if (flushedKeys.size > 0) {
-    const remaining = readQueue().filter((q) => !flushedKeys.has(opKey(q)));
-    writeQueue(remaining);
-    console.log(`[sync] Flush complete — ${flushedKeys.size} operation(s) processed`);
+    const snapshot = readQueue();
+    if (snapshot.length === 0) return;
+
+    console.log(`[sync] Flushing ${snapshot.length} queued operation(s)`);
+
+    const toAdd = snapshot.filter((q) => q.op === "add").map((q) => q.entry);
+    const toDelete = snapshot.filter((q) => q.op === "delete").map((q) => q.entry);
+    const flushedKeys = new Set<string>();
+
+    if (toAdd.length > 0) {
+      try {
+        const response = await fetch(`${API_URL}/api/logs`, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ entries: toAdd }),
+        });
+
+        if (response.ok) {
+          toAdd.forEach((e) => flushedKeys.add(opKey({ op: "add", entry: e })));
+          console.log(`[sync] Uploaded ${toAdd.length} entry/entries`);
+        } else if (response.status === 401) {
+          console.warn("[sync] Upload failed — not authenticated");
+        } else {
+          console.warn(`[sync] Upload failed — server responded ${response.status}`);
+        }
+      } catch (err) {
+        console.warn("[sync] Upload failed — network error", err);
+      }
+    }
+
+    if (toDelete.length > 0) {
+      try {
+        const response = await fetch(`${API_URL}/api/logs`, {
+          method: "DELETE",
+          headers: authHeaders(),
+          body: JSON.stringify({ entries: toDelete }),
+        });
+
+        if (response.ok) {
+          toDelete.forEach((e) => flushedKeys.add(opKey({ op: "delete", entry: e })));
+          console.log(`[sync] Deleted ${toDelete.length} entry/entries`);
+        } else if (response.status === 401) {
+          console.warn("[sync] Delete failed — not authenticated");
+        } else {
+          console.warn(`[sync] Delete failed — server responded ${response.status}`);
+        }
+      } catch (err) {
+        console.warn("[sync] Delete failed — network error", err);
+      }
+    }
+
+    if (flushedKeys.size > 0) {
+      const remaining = readQueue().filter((q) => !flushedKeys.has(opKey(q)));
+      writeQueue(remaining);
+      console.log(`[sync] Flush complete — ${flushedKeys.size} operation(s) processed`);
+    }
+  } finally {
+    _flushing = false;
   }
 }
 
@@ -169,8 +178,9 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
   console.log("[sync] Starting bidirectional sync...");
 
   try {
+    const token = getToken();
     const res = await fetch(`${API_URL}/api/logs`, {
-      headers: { Authorization: `Bearer ${getToken() ?? ""}` },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
     if (res.status === 401) {
@@ -204,13 +214,27 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
       if (uploadRes.ok) {
         console.log(`[sync] Upload complete`);
       } else {
-        console.warn(`[sync] Upload failed — server responded ${uploadRes.status}`);
+        if (uploadRes.status === 401) {
+          throw new Error("AUTH_REQUIRED");
+        }
+        console.warn(`[sync] Upload failed — re-queuing ${toUpload.length} entries for retry`);
+        const currentQueue = readQueue();
+        const currentQKeys = new Set(currentQueue.map(opKey));
+        toUpload.forEach((entry) => {
+          const k = opKey({ op: "add", entry });
+          if (!currentQKeys.has(k)) currentQueue.push({ op: "add", entry });
+        });
+        writeQueue(currentQueue);
       }
     }
 
     // Remote entries missing locally → add to merged set
+    // Exclude entries that are pending deletion in the queue (not yet flushed to remote)
+    const pendingDeleteKeys = new Set(
+      readQueue().filter((q) => q.op === "delete").map((q) => entryKey(q.entry))
+    );
     const toSaveLocally = remoteEntries.filter(
-      (e) => !localKeys.has(entryKey(e)),
+      (e) => !localKeys.has(entryKey(e)) && !pendingDeleteKeys.has(entryKey(e)),
     );
 
     // Build a map of remote entries by key so we can apply server id/notes to local entries
@@ -219,7 +243,10 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
     // For entries that exist in both, use the remote version (has id and notes)
     const reconciled = localEntries.map((e) => remoteByKey.get(entryKey(e)) ?? e);
 
-    if (toSaveLocally.length > 0 || reconciled.some((e, i) => e !== localEntries[i])) {
+    if (toSaveLocally.length > 0 || reconciled.some((e, i) => {
+      const orig = localEntries[i];
+      return e !== orig && (e.id !== orig.id || e.notes !== orig.notes);
+    })) {
       const merged = [...reconciled, ...toSaveLocally].sort(
         (a, b) => a.timestamp - b.timestamp,
       );
@@ -248,8 +275,11 @@ export function initSyncService(): void {
     console.warn("VITE_API_URL is not set, skipping sync");
     return;
   }
-  window.addEventListener("online", () => {
-    flush();
-  });
+  if (!_onlineListenerRegistered) {
+    window.addEventListener("online", () => {
+      flush();
+    });
+    _onlineListenerRegistered = true;
+  }
   flush();
 }
