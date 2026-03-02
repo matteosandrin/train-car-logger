@@ -4,6 +4,7 @@ import EntryFlow from "./pages/EntryFlow";
 import FriendsPage from "./pages/FriendsPage";
 import HistoryPage from "./pages/HistoryPage";
 import LoginPage from "./pages/LoginPage";
+import AccountPage from "./pages/AccountPage";
 import TaskBar from "./components/ui/TaskBar";
 
 import { useLocation } from "react-router-dom";
@@ -23,6 +24,7 @@ const App: React.FC = () => {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

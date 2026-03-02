@@ -1,5 +1,5 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
-import { keys, loadLogs, saveLogs } from "./local-storage";
+import { keys, loadLogs, saveLogs, setLastSyncTime } from "./local-storage";
 import { getToken } from "../auth/auth-service";
 
 const API_URL = import.meta.env.VITE_API_URL as string | undefined;
@@ -151,6 +151,7 @@ export async function flush(): Promise<void> {
     if (flushedKeys.size > 0) {
       const remaining = readQueue().filter((q) => !flushedKeys.has(opKey(q)));
       writeQueue(remaining);
+      setLastSyncTime(Date.now());
       console.log(`[sync] Flush complete — ${flushedKeys.size} operation(s) processed`);
     }
   } finally {
@@ -251,10 +252,12 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
         (a, b) => a.timestamp - b.timestamp,
       );
       saveLogs(merged);
+      setLastSyncTime(Date.now());
       console.log(`[sync] Sync complete — local store now has ${merged.length} entries`);
       return merged;
     }
 
+    setLastSyncTime(Date.now());
     console.log("[sync] Sync complete — no new entries in either direction");
     return localEntries;
   } catch (err) {
@@ -282,4 +285,8 @@ export function initSyncService(): void {
     _onlineListenerRegistered = true;
   }
   flush();
+}
+
+export function getQueueSize(): number {
+  return readQueue().length;
 }
