@@ -61,15 +61,16 @@ const AccountPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Connection</span>
           <span className="flex items-center gap-1.5 text-sm font-medium">
-            <span
-              className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-green-500" : "bg-red-400"}`}
-            />
             {isOnline ? "Connected" : "Offline"}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Pending items</span>
-          <span className="text-sm font-medium text-gray-900">{queueSize}</span>
+          <span className="text-sm font-medium text-gray-900">
+            {queueSize > 0 && <span className="inline-block w-2 h-2 rounded-full bg-orange-400" />}
+            {" "}
+            {queueSize}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Last sync</span>
