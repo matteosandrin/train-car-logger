@@ -12,6 +12,7 @@ export interface Station {
 
 interface StationPickerProps {
   selectedStopId: string | null;
+  sortByDistance?: boolean;
   onSelect: (station: Station) => void;
 }
 
@@ -36,6 +37,7 @@ const allStations = stationsData as Station[];
 
 const StationPicker: React.FC<StationPickerProps> = ({
   selectedStopId,
+  sortByDistance = false,
   onSelect,
 }) => {
   const [query, setQuery] = useState("");
@@ -43,8 +45,10 @@ const StationPicker: React.FC<StationPickerProps> = ({
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!sortByDistance) {
+      return;
+    }
     searchRef.current?.focus();
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -58,6 +62,7 @@ const StationPicker: React.FC<StationPickerProps> = ({
       },
       () => {
         // permission denied or unavailable — keep JSON order
+        console.error("Geolocation permission denied or unavailable");
       },
       { timeout: 5000 },
     );
@@ -77,7 +82,7 @@ const StationPicker: React.FC<StationPickerProps> = ({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search stations..."
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-md text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
       />
       <div className="max-h-64 overflow-y-auto rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100">
         {filtered.length === 0 ? (

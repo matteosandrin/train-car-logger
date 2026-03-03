@@ -19,9 +19,6 @@ interface ConfirmationScreenProps {
 
 type OpenPicker = "origin" | "destination" | null;
 
-const labelClass =
-  "block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500";
-
 interface StationFieldProps {
   station: Station | null;
   isOpen: boolean;
@@ -30,6 +27,7 @@ interface StationFieldProps {
   onSelect: (s: Station) => void;
   onClear: () => void;
   addLabel: string;
+  sortByDistance?: boolean;
 }
 
 const StationField: React.FC<StationFieldProps> = ({
@@ -40,6 +38,7 @@ const StationField: React.FC<StationFieldProps> = ({
   onSelect,
   onClear,
   addLabel,
+  sortByDistance = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -57,13 +56,6 @@ const StationField: React.FC<StationFieldProps> = ({
 
   return (
     <div ref={containerRef} className="w-full flex flex-col gap-2 text-left">
-      {station && (
-        <div className="flex items-center justify-between">
-          <Button variant="pillSecondary" onClick={onClear}>
-            Clear
-          </Button>
-        </div>
-      )}
       {isOpen ? (
         <StationPicker
           selectedStopId={station?.stop_id ?? null}
@@ -71,19 +63,28 @@ const StationField: React.FC<StationFieldProps> = ({
             onSelect(s);
             onClose();
           }}
+          sortByDistance={sortByDistance}
         />
+      ) : station ? (
+        <div className="w-full flex items-center rounded-2xl bg-slate-50 border border-slate-200 pl-4 pr-2 py-2 text-md">
+          <button
+            type="button"
+            onClick={onOpen}
+            className="flex-1 text-left font-medium focus-visible:outline-none"
+          >
+            {station.stop_name}
+          </button>
+          <Button variant="pillSecondary" onClick={onClear} className="shrink-0 !rounded-xl !py-[0.31rem]">
+            Clear
+          </Button>
+        </div>
       ) : (
         <button
           type="button"
           onClick={onOpen}
-          className={[
-            "w-full rounded-2xl px-4 py-3 text-left text-sm transition-colors duration-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400",
-            station
-              ? "bg-slate-50 ring-1 ring-sky-200 font-medium text-sky-700 md:hover:bg-sky-50 active:bg-sky-100"
-              : "bg-white ring-1 ring-slate-200 text-slate-400 md:hover:bg-slate-50 active:bg-slate-100",
-          ].join(" ")}
+          className="w-full rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-left text-md text-slate-400 transition-colors duration-100 md:hover:bg-slate-50 active:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
         >
-          {station ? station.stop_name : addLabel}
+          {addLabel}
         </button>
       )}
     </div>
@@ -132,6 +133,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
         onSelect={onOriginChange}
         onClear={() => onOriginChange(null)}
         addLabel="Add origin station"
+        sortByDistance={true}
       />
 
       <StationField
