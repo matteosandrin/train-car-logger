@@ -6,7 +6,6 @@ export interface StationFieldProps {
   station: Station | null;
   isOpen: boolean;
   addLabel: string;
-  sortByDistance?: boolean;
   onOpen: () => void;
   onClose: () => void;
   onSelect: (s: Station) => void;
@@ -17,7 +16,6 @@ const StationField: React.FC<StationFieldProps> = ({
   station,
   isOpen,
   addLabel,
-  sortByDistance = false,
   onOpen,
   onClose,
   onSelect,
@@ -46,7 +44,7 @@ const StationField: React.FC<StationFieldProps> = ({
             onSelect(s);
             onClose();
           }}
-          sortByDistance={sortByDistance}
+
         />
       ) : station ? (
         <div className="w-full flex items-center rounded-2xl bg-slate-50 border border-slate-200 pl-4 pr-2 py-2 text-md">

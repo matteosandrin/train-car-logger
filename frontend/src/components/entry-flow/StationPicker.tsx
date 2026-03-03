@@ -12,7 +12,6 @@ export interface Station {
 
 interface StationPickerProps {
   selectedStopId: string | null;
-  sortByDistance?: boolean;
   onSelect: (station: Station) => void;
 }
 
@@ -37,42 +36,43 @@ const allStations = stationsData as Station[];
 
 const StationPicker: React.FC<StationPickerProps> = ({
   selectedStopId,
-  sortByDistance = false,
   onSelect,
 }) => {
   const [query, setQuery] = useState("");
-  const [stations, setStations] = useState<Station[]>(allStations);
+  const [closestStopId, setClosestStopId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   useEffect(() => {
-    if (!sortByDistance) {
-      return;
-    }
     searchRef.current?.focus();
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setStations(
-          [...allStations].sort(
-            (a, b) =>
-              haversineKm(latitude, longitude, a.latitude, a.longitude) -
-              haversineKm(latitude, longitude, b.latitude, b.longitude),
-          ),
+        const closest = allStations.reduce(
+          (best, s) => {
+            const d = haversineKm(latitude, longitude, s.latitude, s.longitude);
+            return d < best.dist ? { station: s, dist: d } : best;
+          },
+          { station: allStations[0], dist: Infinity },
         );
+        setClosestStopId(closest.station.stop_id);
       },
-      () => {
-        // permission denied or unavailable — keep JSON order
-        console.error("Geolocation permission denied or unavailable");
-      },
+      () => {},
       { timeout: 5000 },
     );
   }, []);
 
+  useEffect(() => {
+    if (!closestStopId) return;
+    rowRefs.current.get(closestStopId)?.scrollIntoView({ block: "start" });
+  }, [closestStopId]);
+
   const filtered = query.trim()
-    ? stations.filter((s) =>
+    ? allStations.filter((s) =>
         s.stop_name.toLowerCase().includes(query.toLowerCase()),
       )
-    : stations;
+    : allStations;
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -94,6 +94,10 @@ const StationPicker: React.FC<StationPickerProps> = ({
               <button
                 key={station.stop_id}
                 type="button"
+                ref={(el) => {
+                  if (el) rowRefs.current.set(station.stop_id, el);
+                  else rowRefs.current.delete(station.stop_id);
+                }}
                 onClick={() => onSelect(station)}
                 className={[
                   "w-full flex items-center justify-between gap-2 px-4 py-3 text-left transition-colors duration-100",

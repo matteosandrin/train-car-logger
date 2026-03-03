@@ -62,7 +62,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
         onSelect={onOriginChange}
         onClear={() => onOriginChange(null)}
         addLabel="Add origin station"
-        sortByDistance={true}
+
       />
 
       <StationField
