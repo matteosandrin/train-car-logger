@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NumberPadScreen from "../components/entry-flow/NumberPadScreen";
 import LinePickerScreen from "../components/entry-flow/LinePickerScreen";
 import ConfirmationScreen from "../components/entry-flow/ConfirmationScreen";
+import type { Station } from "../components/entry-flow/StationPicker";
 import { useLogsContext } from "../storage";
 
 type Step = "input" | "line" | "confirm";
@@ -12,6 +13,8 @@ const EntryFlow: React.FC = () => {
   const [carNumber, setCarNumber] = useState<string>("");
   const [line, setLine] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
+  const [originStation, setOriginStation] = useState<Station | null>(null);
+  const [destinationStation, setDestinationStation] = useState<Station | null>(null);
   const { addLog, getCarCount } = useLogsContext();
   const navigate = useNavigate();
 
@@ -19,6 +22,8 @@ const EntryFlow: React.FC = () => {
     setCarNumber("");
     setLine(null);
     setNote("");
+    setOriginStation(null);
+    setDestinationStation(null);
     setStep("input");
   }, []);
 
@@ -74,6 +79,10 @@ const EntryFlow: React.FC = () => {
         onNoteChange={setNote}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+        originStation={originStation}
+        destinationStation={destinationStation}
+        onOriginChange={setOriginStation}
+        onDestinationChange={setDestinationStation}
       />
     );
   }
