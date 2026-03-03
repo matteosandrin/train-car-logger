@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { assetUrl } from "../../assets";
-import StationPicker, { type Station } from "./StationPicker";
+import { type Station } from "./StationPicker";
+import StationField from "./StationField";
 
 interface ConfirmationScreenProps {
   carNumber: string;
@@ -18,78 +19,6 @@ interface ConfirmationScreenProps {
 }
 
 type OpenPicker = "origin" | "destination" | null;
-
-interface StationFieldProps {
-  station: Station | null;
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-  onSelect: (s: Station) => void;
-  onClear: () => void;
-  addLabel: string;
-  sortByDistance?: boolean;
-}
-
-const StationField: React.FC<StationFieldProps> = ({
-  station,
-  isOpen,
-  onOpen,
-  onClose,
-  onSelect,
-  onClear,
-  addLabel,
-  sortByDistance = false,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseDown = useCallback((e: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  }, [onClose]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, [isOpen, handleMouseDown]);
-
-  return (
-    <div ref={containerRef} className="w-full flex flex-col gap-2 text-left">
-      {isOpen ? (
-        <StationPicker
-          selectedStopId={station?.stop_id ?? null}
-          onSelect={(s) => {
-            onSelect(s);
-            onClose();
-          }}
-          sortByDistance={sortByDistance}
-        />
-      ) : station ? (
-        <div className="w-full flex items-center rounded-2xl bg-slate-50 border border-slate-200 pl-4 pr-2 py-2 text-md">
-          <button
-            type="button"
-            onClick={onOpen}
-            className="flex-1 text-left font-medium focus-visible:outline-none"
-          >
-            {station.stop_name}
-          </button>
-          <Button variant="pillSecondary" onClick={onClear} className="shrink-0 !rounded-xl !py-[0.31rem]">
-            Clear
-          </Button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={onOpen}
-          className="w-full rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-left text-md text-slate-400 transition-colors duration-100 md:hover:bg-slate-50 active:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
-        >
-          {addLabel}
-        </button>
-      )}
-    </div>
-  );
-};
 
 const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   carNumber,
