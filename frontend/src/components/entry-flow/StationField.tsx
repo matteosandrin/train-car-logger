@@ -39,6 +39,9 @@ const StationField: React.FC<StationFieldProps> = ({
     // close picker when focus is lost
     const container = containerRef.current;
     const handleFocusOut = (e: FocusEvent) => {
+      // On mobile (touch), relatedTarget is null — the mousedown listener handles
+      // "tap outside to close". Only close here for keyboard focus changes.
+      if (!e.relatedTarget) return;
       if (!container?.contains(e.relatedTarget as Node)) {
         onClose();
       }
