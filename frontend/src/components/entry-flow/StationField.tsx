@@ -33,9 +33,23 @@ const StationField: React.FC<StationFieldProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    // scroll the station field to the top of the screen
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     document.addEventListener("mousedown", handleMouseDown);
-    return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, [isOpen, handleMouseDown]);
+    // close picker when focus is lost
+    const container = containerRef.current;
+    const handleFocusOut = (e: FocusEvent) => {
+      if (!container?.contains(e.relatedTarget as Node)) {
+        onClose();
+      }
+    };
+    container?.addEventListener("focusout", handleFocusOut);
+
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      container?.removeEventListener("focusout", handleFocusOut);
+    };
+  }, [isOpen, handleMouseDown, onClose]);
 
   return (
     <div ref={containerRef} className="w-full flex flex-col gap-2 text-left">

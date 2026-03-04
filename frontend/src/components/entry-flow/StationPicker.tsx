@@ -68,9 +68,14 @@ const StationPicker: React.FC<StationPickerProps> = ({
     );
   }, []);
 
+  // when the closest stop is selected, scroll to it
   useEffect(() => {
     if (!closestStopId) return;
-    rowRefs.current.get(closestStopId)?.scrollIntoView({ block: "start" });
+    const el = rowRefs.current.get(closestStopId);
+    const list = listRef.current;
+    if (el && list) {
+      list.scrollTop = list.scrollTop + el.getBoundingClientRect().top - list.getBoundingClientRect().top;
+    }
   }, [closestStopId]);
 
   const filtered = query.trim()
@@ -90,7 +95,7 @@ const StationPicker: React.FC<StationPickerProps> = ({
         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-md text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
       />
       <div className="rounded-2xl border border-slate-200 overflow-hidden">
-      <div className="max-h-64 overflow-y-auto bg-white divide-y divide-slate-100 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200">
+      <div ref={listRef} className="max-h-64 overflow-y-auto bg-white divide-y divide-slate-100 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200">
         {filtered.length === 0 ? (
           <p className="px-4 py-3 text-sm text-slate-400">No stations found</p>
         ) : (
