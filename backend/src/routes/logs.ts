@@ -37,6 +37,8 @@ router.post("/logs", requireAuth, async (req, res) => {
     car: e.car,
     line: e.line,
     notes: typeof e.notes === "string" ? e.notes : null,
+    origin: typeof e.origin === "string" ? e.origin : null,
+    destination: typeof e.destination === "string" ? e.destination : null,
   }));
 
   const result = await db
@@ -58,6 +60,8 @@ router.get("/logs", requireAuth, async (req, res) => {
       car: carsTable.car,
       line: carsTable.line,
       notes: carsTable.notes,
+      origin: carsTable.origin,
+      destination: carsTable.destination,
     })
     .from(carsTable)
     .where(eq(carsTable.userId, userId))

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { assetUrl } from "../../assets";
+import { type Station } from "./StationPicker";
+import StationField from "./StationField";
 
 interface ConfirmationScreenProps {
   carNumber: string;
@@ -10,7 +12,13 @@ interface ConfirmationScreenProps {
   onNoteChange: (note: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
+  origin: Station | null;
+  destination: Station | null;
+  onOriginChange: (s: Station | null) => void;
+  onDestinationChange: (s: Station | null) => void;
 }
+
+type OpenPicker = "origin" | "destination" | null;
 
 const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   carNumber,
@@ -19,7 +27,13 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   onNoteChange,
   onConfirm,
   onCancel,
+  origin,
+  destination,
+  onOriginChange,
+  onDestinationChange,
 }) => {
+  const [openPicker, setOpenPicker] = useState<OpenPicker>(null);
+
   return (
     <FlowContainer>
       <h1 className="text-2xl font-semibold">Confirm Entry</h1>
@@ -39,6 +53,29 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
           <img className="mt-2 w-20 h-20" src={assetUrl(`/img/${line}.svg`)} />
         </div>
       </div>
+
+      <StationField
+        station={origin}
+        isOpen={openPicker === "origin"}
+        onOpen={() => setOpenPicker("origin")}
+        onClose={() => setOpenPicker(null)}
+        onSelect={onOriginChange}
+        onClear={() => onOriginChange(null)}
+        addLabel="Add origin station"
+        line={line}
+      />
+
+      <StationField
+        station={destination}
+        isOpen={openPicker === "destination"}
+        onOpen={() => setOpenPicker("destination")}
+        onClose={() => setOpenPicker(null)}
+        onSelect={onDestinationChange}
+        onClear={() => onDestinationChange(null)}
+        addLabel="Add destination station"
+        line={line}
+      />
+
       <textarea
         className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-md text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-sky-300"
         rows={3}

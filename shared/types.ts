@@ -4,4 +4,6 @@ export interface TrainLogEntry {
   car: string;
   line: string;
   notes?: string;
+  origin?: string;
+  destination?: string;
 }

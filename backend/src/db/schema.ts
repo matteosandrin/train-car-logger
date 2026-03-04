@@ -24,6 +24,8 @@ export const carsTable = pgTable(
     car: text("car").notNull(),
     line: text("line").notNull(),
     notes: text("notes"),
+    origin: text("origin"),
+    destination: text("destination"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
