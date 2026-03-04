@@ -12,8 +12,8 @@ interface ConfirmationScreenProps {
   onNoteChange: (note: string) => void;
   onConfirm: () => void;
   onCancel: () => void;
-  originStation: Station | null;
-  destinationStation: Station | null;
+  origin: Station | null;
+  destination: Station | null;
   onOriginChange: (s: Station | null) => void;
   onDestinationChange: (s: Station | null) => void;
 }
@@ -27,8 +27,8 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   onNoteChange,
   onConfirm,
   onCancel,
-  originStation,
-  destinationStation,
+  origin,
+  destination,
   onOriginChange,
   onDestinationChange,
 }) => {
@@ -55,7 +55,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
       </div>
 
       <StationField
-        station={originStation}
+        station={origin}
         isOpen={openPicker === "origin"}
         onOpen={() => setOpenPicker("origin")}
         onClose={() => setOpenPicker(null)}
@@ -66,7 +66,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
       />
 
       <StationField
-        station={destinationStation}
+        station={destination}
         isOpen={openPicker === "destination"}
         onOpen={() => setOpenPicker("destination")}
         onClose={() => setOpenPicker(null)}

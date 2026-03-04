@@ -14,7 +14,7 @@ import { useAuthContext } from "../auth";
 
 export interface LogsContextValue {
   logs: TrainLogEntry[];
-  addLog: (car: string, line: string, timestamp?: number, notes?: string) => void;
+  addLog: (car: string, line: string, timestamp?: number, notes?: string, origin?: string, destination?: string) => void;
   removeLog: (entry: TrainLogEntry) => void;
   updateNote: (entry: TrainLogEntry, notes: string) => Promise<void>;
   getCarCount: (car: string) => number;
@@ -30,12 +30,14 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
   const navigate = useNavigate();
 
   const addLog = useCallback(
-    (car: string, line: string, timestamp?: number, notes?: string) => {
+    (car: string, line: string, timestamp?: number, notes?: string, origin?: string, destination?: string) => {
       const nextEntry: TrainLogEntry = {
         car,
         line,
         timestamp: timestamp ?? Math.floor(Date.now()),
         notes: notes || undefined,
+        origin: origin || undefined,
+        destination: destination || undefined,
       };
       enqueue(nextEntry);
       setLogs((prev) => {

@@ -13,8 +13,8 @@ const EntryFlow: React.FC = () => {
   const [carNumber, setCarNumber] = useState<string>("");
   const [line, setLine] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
-  const [originStation, setOriginStation] = useState<Station | null>(null);
-  const [destinationStation, setDestinationStation] = useState<Station | null>(null);
+  const [origin, setOrigin] = useState<Station | null>(null);
+  const [destination, setDestination] = useState<Station | null>(null);
   const { addLog, getCarCount } = useLogsContext();
   const navigate = useNavigate();
 
@@ -22,8 +22,8 @@ const EntryFlow: React.FC = () => {
     setCarNumber("");
     setLine(null);
     setNote("");
-    setOriginStation(null);
-    setDestinationStation(null);
+    setOrigin(null);
+    setDestination(null);
     setStep("input");
   }, []);
 
@@ -56,7 +56,7 @@ const EntryFlow: React.FC = () => {
       return;
     }
 
-    addLog(carNumber, line, undefined, note || undefined);
+    addLog(carNumber, line, undefined, note || undefined, origin?.stop_id ?? undefined, destination?.stop_id ?? undefined);
     const repeat = getCarCount(carNumber);
     resetFlow();
     navigate("/history", { state: { fromNewEntry: true, repeat } });
@@ -79,10 +79,10 @@ const EntryFlow: React.FC = () => {
         onNoteChange={setNote}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
-        originStation={originStation}
-        destinationStation={destinationStation}
-        onOriginChange={setOriginStation}
-        onDestinationChange={setDestinationStation}
+        origin={origin}
+        destination={destination}
+        onOriginChange={setOrigin}
+        onDestinationChange={setDestination}
       />
     );
   }
