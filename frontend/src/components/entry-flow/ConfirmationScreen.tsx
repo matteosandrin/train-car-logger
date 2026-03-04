@@ -62,7 +62,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
         onSelect={onOriginChange}
         onClear={() => onOriginChange(null)}
         addLabel="Add origin station"
-
+        line={line}
       />
 
       <StationField
@@ -73,6 +73,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
         onSelect={onDestinationChange}
         onClear={() => onDestinationChange(null)}
         addLabel="Add destination station"
+        line={line}
       />
 
       <textarea

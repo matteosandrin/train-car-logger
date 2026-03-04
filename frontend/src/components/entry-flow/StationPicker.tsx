@@ -13,6 +13,7 @@ export interface Station {
 interface StationPickerProps {
   selectedStopId: string | null;
   onSelect: (station: Station) => void;
+  line?: string;
 }
 
 function haversineKm(
@@ -37,7 +38,11 @@ const allStations = stationsData as Station[];
 const StationPicker: React.FC<StationPickerProps> = ({
   selectedStopId,
   onSelect,
+  line,
 }) => {
+  const stations = line
+    ? allStations.filter((s) => s.routes.map((r) => r.toLowerCase()).includes(line.toLowerCase()))
+    : allStations;
   const [query, setQuery] = useState("");
   const [closestStopId, setClosestStopId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -49,12 +54,12 @@ const StationPicker: React.FC<StationPickerProps> = ({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        const closest = allStations.reduce(
+        const closest = stations.reduce(
           (best, s) => {
             const d = haversineKm(latitude, longitude, s.latitude, s.longitude);
             return d < best.dist ? { station: s, dist: d } : best;
           },
-          { station: allStations[0], dist: Infinity },
+          { station: stations[0], dist: Infinity },
         );
         setClosestStopId(closest.station.stop_id);
       },
@@ -69,10 +74,10 @@ const StationPicker: React.FC<StationPickerProps> = ({
   }, [closestStopId]);
 
   const filtered = query.trim()
-    ? allStations.filter((s) =>
+    ? stations.filter((s) =>
         s.stop_name.toLowerCase().includes(query.toLowerCase()),
       )
-    : allStations;
+    : stations;
 
   return (
     <div className="w-full flex flex-col gap-2">
