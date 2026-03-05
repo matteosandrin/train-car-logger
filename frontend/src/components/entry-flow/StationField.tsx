@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import Button from "../ui/Button";
-import StationPicker, { type Station } from "./StationPicker";
+import StationPicker from "./StationPicker";
+import { Station } from "../../utils/subway";
 
 export interface StationFieldProps {
   station: Station | null;

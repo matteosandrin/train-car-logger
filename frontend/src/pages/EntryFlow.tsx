@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NumberPadScreen from "../components/entry-flow/NumberPadScreen";
 import LinePickerScreen from "../components/entry-flow/LinePickerScreen";
 import ConfirmationScreen from "../components/entry-flow/ConfirmationScreen";
-import type { Station } from "../components/entry-flow/StationPicker";
+import { Station } from "../utils/subway";
 import { useLogsContext } from "../storage";
 
 type Step = "input" | "line" | "confirm";
