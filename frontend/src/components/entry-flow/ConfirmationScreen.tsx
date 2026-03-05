@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { assetUrl } from "../../assets";
-import { type Station } from "./StationPicker";
+import { Station } from "../../utils/subway";
 import StationField from "./StationField";
 
 interface ConfirmationScreenProps {

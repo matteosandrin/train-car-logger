@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import stationsData from "../../utils/stations.json";
 import { assetUrl } from "../../assets";
-
-export interface Station {
-  stop_id: string;
-  stop_name: string;
-  latitude: number;
-  longitude: number;
-  routes: string[];
-}
+import { Station, getStopsForRoute } from "../../utils/subway";
 
 interface StationPickerProps {
   selectedStopId: string | null;
@@ -33,16 +25,12 @@ function haversineKm(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-const allStations = stationsData as Station[];
-
 const StationPicker: React.FC<StationPickerProps> = ({
   selectedStopId,
   onSelect,
   line,
 }) => {
-  const stations = line
-    ? allStations.filter((s) => s.routes.map((r) => r.toLowerCase()).includes(line.toLowerCase()))
-    : allStations;
+  const stations = line ? getStopsForRoute(line) : [];
   const [query, setQuery] = useState("");
   const [closestStopId, setClosestStopId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);

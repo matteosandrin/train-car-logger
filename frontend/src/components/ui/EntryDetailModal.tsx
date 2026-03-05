@@ -5,11 +5,7 @@ import { assetUrl } from "../../assets";
 import { formatTimestamp } from "../../utils/formatting";
 import Button from "./Button";
 import { useLogsContext } from "../../storage";
-import stationsData from "../../utils/stations.json";
-
-const stationNameById = new Map(
-  (stationsData as { stop_id: string; stop_name: string }[]).map((s) => [s.stop_id, s.stop_name])
-);
+import { getStation } from "../../utils/subway";
 
 interface EntryDetailModalProps {
   entry: TrainLogEntry;
@@ -21,6 +17,8 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
   const { updateNote } = useLogsContext();
   const [note, setNote] = useState(entry.notes ?? "");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const originStation = entry.origin ? getStation(entry.origin) : null;
+  const destinationStation = entry.destination ? getStation(entry.destination) : null;
 
   if (typeof document === "undefined") {
     return null;
@@ -62,14 +60,18 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
           </div>
           {(entry.origin || entry.destination) && (
             <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <div className="min-w-0">
-                <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">From</span>
-                <span className="text-sm text-slate-700">{entry.origin ? (stationNameById.get(entry.origin) ?? entry.origin) : "—"}</span>
-              </div>
-              <div className="min-w-0">
-                <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">To</span>
-                <span className="text-sm text-slate-700">{entry.destination ? (stationNameById.get(entry.destination) ?? entry.destination) : "—"}</span>
-              </div>
+              {originStation && (
+                <div className="min-w-0">
+                  <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">From</span>
+                  <span className="text-sm text-slate-700">{originStation.stop_name}</span>
+                </div>
+              )}
+              {destinationStation && (
+                <div className="min-w-0">
+                  <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">To</span>
+                  <span className="text-sm text-slate-700">{destinationStation.stop_name}</span>
+                </div>
+              )}
             </div>
           )}
           <div className="flex justify-between items-center gap-4">
