@@ -73,12 +73,12 @@ stations.map((s) => {
 const routeMap = new Map(routes.routes.map((r) => [r.id.toLowerCase(), r]));
 
 const getStation = (stationId: string): Station | null => {
-  const station = stationMap.get(stationId.toLowerCase());
+  const station = stationMap.get(stationId);
   return station ?? null;
 };
 
 const getStopsForRoute = (routeId: string): Station[] => {
-  const route = routeMap.get(routeId);
+  const route = routeMap.get(routeId.toLowerCase());
   if (!route) return [];
   return route.stops.map((s) => {
     const station = stationMap.get(s);
@@ -93,4 +93,42 @@ const getStopsForRoute = (routeId: string): Station[] => {
   }).filter((s) => s !== null);
 };
 
-export { type Station, SubwayLine, PICKER_LINES, getStation, getStopsForRoute };
+const getRouteColor = (routeId: string): string | null => {
+  const route = routeMap.get(routeId.toLowerCase());
+  if (!route) return null;
+  return `#${route.color}`;
+};
+
+const getStopsBetween = (
+  routeId: string,
+  originId: string,
+  destinationId: string,
+): Station[] => {
+  const stops = getStopsForRoute(routeId);
+  if (stops.length === 0) return [];
+
+  const originStation = getStation(originId);
+  const destStation = getStation(destinationId);
+  if (!originStation || !destStation) return [];
+
+  const originIdx = stops.findIndex(
+    (s) => s.stop_id === originStation.stop_id,
+  );
+  const destIdx = stops.findIndex((s) => s.stop_id === destStation.stop_id);
+  if (originIdx === -1 || destIdx === -1) return [];
+
+  if (originIdx <= destIdx) {
+    return stops.slice(originIdx, destIdx + 1);
+  }
+  return stops.slice(destIdx, originIdx + 1).reverse();
+};
+
+export {
+  type Station,
+  SubwayLine,
+  PICKER_LINES,
+  getStation,
+  getStopsForRoute,
+  getRouteColor,
+  getStopsBetween,
+};

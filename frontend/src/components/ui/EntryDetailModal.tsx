@@ -6,6 +6,7 @@ import { formatTimestamp } from "../../utils/formatting";
 import Button from "./Button";
 import { useLogsContext } from "../../storage";
 import { getStation } from "../../utils/subway";
+import RouteDiagram from "./RouteDiagram";
 
 interface EntryDetailModalProps {
   entry: TrainLogEntry;
@@ -58,7 +59,9 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
               <div className="text-4xl font-bold font-mono">{entry.car}</div>
             </div>
           </div>
-          {(entry.origin || entry.destination) && (
+          {entry.origin && entry.destination ? (
+            <RouteDiagram line={entry.line} origin={entry.origin} destination={entry.destination} />
+          ) : (entry.origin || entry.destination) ? (
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               {originStation && (
                 <div className="min-w-0">
@@ -73,7 +76,7 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
                 </div>
               )}
             </div>
-          )}
+          ) : null}
           <div className="flex justify-between items-center gap-4">
             <p className="text-sm text-slate-500 font-mono">{formatTimestamp(entry.timestamp)}</p>
             <Button variant="pillSecondary" onClick={() => setConfirmingDelete(true)}>
