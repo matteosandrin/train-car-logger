@@ -46,42 +46,26 @@ const EntryDetailModal: React.FC<EntryDetailModalProps> = ({ entry, onClose, onD
         />
         <div className="slide-up-sheet absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 flex flex-col gap-4">
           <div className="w-10 h-1 rounded-full bg-slate-300 mx-auto" />
-          <div className="flex items-center gap-4 h-16">
+          <div className="flex items-center gap-4">
             <img
               className="w-16 h-16"
               src={assetUrl(`/img/${entry.line}.svg`)}
               alt={entry.line}
             />
             <div>
-              <span className="block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                Car
-              </span>
               <div className="text-4xl font-bold font-mono">{entry.car}</div>
             </div>
+            {entry.origin && entry.destination && (
+              <div className="ml-6">
+                <RouteDiagram line={entry.line} origin={entry.origin} destination={entry.destination} />
+              </div>
+            )}
           </div>
-          {entry.origin && entry.destination ? (
-            <RouteDiagram line={entry.line} origin={entry.origin} destination={entry.destination} />
-          ) : (entry.origin || entry.destination) ? (
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {originStation && (
-                <div className="min-w-0">
-                  <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">From</span>
-                  <span className="text-sm text-slate-700">{originStation.stop_name}</span>
-                </div>
-              )}
-              {destinationStation && (
-                <div className="min-w-0">
-                  <span className="block text-xs font-semibold uppercase tracking-widest text-slate-400">To</span>
-                  <span className="text-sm text-slate-700">{destinationStation.stop_name}</span>
-                </div>
-              )}
-            </div>
-          ) : null}
           <div className="flex justify-between items-center gap-4">
-            <p className="text-sm text-slate-500 font-mono">{formatTimestamp(entry.timestamp)}</p>
             <Button variant="pillSecondary" onClick={() => setConfirmingDelete(true)}>
               Delete entry
             </Button>
+            <p className="text-sm text-slate-500 font-mono">{formatTimestamp(entry.timestamp)}</p>
           </div>
           <textarea
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-md text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-sky-300"
