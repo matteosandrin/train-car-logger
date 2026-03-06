@@ -4,6 +4,7 @@ import { useAuthContext } from "../auth/use-auth-context";
 import Button from "../components/ui/Button";
 import { getLastSyncTime } from "../storage/local-storage";
 import { getQueueSize } from "../storage/sync-service";
+import { version } from "../../package.json";
 
 function formatLastSync(ts: number | null): string {
   if (ts === null) return "Never";
@@ -77,10 +78,13 @@ const AccountPage: React.FC = () => {
           <span className="text-sm font-medium text-gray-900 font-mono">{formatLastSync(lastSync)}</span>
         </div>
       </div>
-
       <Button variant="secondary" onClick={handleSignOut}>
         Sign out
       </Button>
+      <Button variant="secondary" onClick={() => window.location.reload()}>
+        Refresh app
+      </Button>
+      <p className="text-center text-sm text-gray-400">v{version}</p>
     </div>
   );
 };
