@@ -1,8 +1,7 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { keys, loadLogs, saveLogs, setLastSyncTime } from "./local-storage";
-import { getToken } from "../auth/auth-service";
-
-const API_URL = import.meta.env.VITE_API_URL as string | undefined;
+import { API_URL } from "../api/config";
+import { apiFetch } from "../api/client";
 
 let _flushing = false;
 let _onlineListenerRegistered = false;
@@ -30,13 +29,6 @@ function entryKey(e: TrainLogEntry): string {
 
 function opKey(q: QueueEntry): string {
   return `${q.op}|${entryKey(q.entry)}`;
-}
-
-function authHeaders(): Record<string, string> {
-  const token = getToken();
-  return token
-    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-    : { "Content-Type": "application/json" };
 }
 
 /**
@@ -108,9 +100,9 @@ export async function flush(): Promise<void> {
 
     if (toAdd.length > 0) {
       try {
-        const response = await fetch(`${API_URL}/api/logs`, {
+        const response = await apiFetch("/api/logs", {
           method: "POST",
-          headers: authHeaders(),
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ entries: toAdd }),
         });
 
@@ -129,9 +121,9 @@ export async function flush(): Promise<void> {
 
     if (toDelete.length > 0) {
       try {
-        const response = await fetch(`${API_URL}/api/logs`, {
+        const response = await apiFetch("/api/logs", {
           method: "DELETE",
-          headers: authHeaders(),
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ entries: toDelete }),
         });
 
@@ -179,10 +171,7 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
   console.log("[sync] Starting bidirectional sync...");
 
   try {
-    const token = getToken();
-    const res = await fetch(`${API_URL}/api/logs`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    const res = await apiFetch("/api/logs");
 
     if (res.status === 401) {
       throw new Error("AUTH_REQUIRED");
@@ -207,9 +196,9 @@ export async function syncWithRemote(): Promise<TrainLogEntry[]> {
     const toUpload = localEntries.filter((e) => !remoteKeys.has(entryKey(e)));
     if (toUpload.length > 0) {
       console.log(`[sync] Uploading ${toUpload.length} local entry/entries missing from remote`);
-      const uploadRes = await fetch(`${API_URL}/api/logs`, {
+      const uploadRes = await apiFetch("/api/logs", {
         method: "POST",
-        headers: authHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entries: toUpload }),
       });
       if (uploadRes.ok) {

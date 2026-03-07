@@ -1,6 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL as string | undefined;
-const TOKEN_KEY = "train-car-logger-token";
-const USER_KEY = "train-car-logger-user";
+import { keys } from "../storage/local-storage";
+import { API_URL } from "../api/config";
+
+const { TOKEN_KEY, USER_KEY } = keys;
 
 export interface AuthUser {
   userId: number;

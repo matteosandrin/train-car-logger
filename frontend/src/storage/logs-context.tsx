@@ -92,10 +92,9 @@ export const LogsProvider: React.FC<React.PropsWithChildren> = ({
 
   const getCarCount = useCallback(
     (car: string): number => {
-      const newLogs = loadLogs();
-      return newLogs.filter((entry) => entry.car === car).length;
+      return logs.filter((entry) => entry.car === car).length;
     },
-    [loadLogs],
+    [logs],
   );
 
   useEffect(() => {
