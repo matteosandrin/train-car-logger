@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchSharedFriends, postNotifications, type SharedFriend } from "../api/client";
+import { processPendingNotifications } from "../utils/notifications";
 import { assetUrl } from "../assets";
 import { useAuthContext } from "../auth/use-auth-context";
 import { UserHeader } from "../components/ui/UserHeader";
@@ -24,18 +25,9 @@ const FriendsPage: React.FC = () => {
     fetchSharedFriends()
       .then((data) => {
         setFriends(data);
-        const pending = [];
-        const notifications = [];
-        for (const friend of data) {
-          for (const { id, line, notified } of friend.cars) {
-            if (!notified) {
-              pending.push({ line, friendName: friend.username });
-              notifications.push({ friendUserId: friend.id, loggedCarId: id });
-            }
-          }
-        }
+        const { animationQueue: pending, notificationsToSend } = processPendingNotifications(data);
         if (pending.length > 0) setAnimationQueue(pending);
-        if (notifications.length > 0) postNotifications(notifications);
+        if (notificationsToSend.length > 0) postNotifications(notificationsToSend);
       })
       .catch((err: unknown) =>
         setError(err instanceof Error ? err.message : "Unknown error")

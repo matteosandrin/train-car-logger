@@ -3,11 +3,15 @@ import type { TrainLogEntry } from "@train-car-logger/shared";
 const STORAGE_KEY = "train-car-logger";
 const SYNC_QUEUE_KEY = "train-car-logger-sync-queue";
 const LAST_SYNC_KEY = "train-car-logger-last-sync";
+const TOKEN_KEY = "train-car-logger-token";
+const USER_KEY = "train-car-logger-user";
 
 export const keys = {
   STORAGE_KEY,
   SYNC_QUEUE_KEY,
   LAST_SYNC_KEY,
+  TOKEN_KEY,
+  USER_KEY,
 };
 
 interface PersistedData {
@@ -49,12 +53,6 @@ export function saveLogs(entries: TrainLogEntry[]): void {
 
   const payload: PersistedData = { data: entries };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-}
-
-export function appendLog(entry: TrainLogEntry): TrainLogEntry[] {
-  const next = [...loadLogs(), entry];
-  saveLogs(next);
-  return next;
 }
 
 export function getLastSyncTime(): number | null {

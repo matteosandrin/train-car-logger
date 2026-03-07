@@ -1,17 +1,18 @@
 import type { TrainLogEntry } from "@train-car-logger/shared";
 import { getToken } from "../auth/auth-service";
+import { API_URL } from "./config";
 
-const API_URL = import.meta.env.VITE_API_URL as string | undefined;
-
-function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+export function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!API_URL) throw new Error("VITE_API_URL is not set");
-  const token = getToken();
-  if (!token) throw new Error("No token found");
 
+  const token = getToken();
   const { headers, ...rest } = init;
   return fetch(`${API_URL}${path}`, {
     ...rest,
-    headers: { Authorization: `Bearer ${token}`, ...headers },
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
   });
 }
 

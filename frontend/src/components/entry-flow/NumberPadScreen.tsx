@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { calculateTrainStats } from "../../utils/stats";
@@ -20,8 +20,6 @@ const MAX_LENGTH = 4;
 
 const keypadDigits = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-const CLEAR_COUNT_THRESHOLD = 3;
-
 const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   value,
   onDigit,
@@ -30,8 +28,6 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
   onConfirm,
 }) => {
   const { logs } = useLogsContext();
-  let clearCount = 0;
-
   if (value.length === MAX_LENGTH) {
     onConfirm();
   }
@@ -86,16 +82,6 @@ const NumberPadScreen: React.FC<NumberPadScreenProps> = ({
           <Button
             variant="keypadSecondary"
             onClick={() => {
-              clearCount++;
-              if (clearCount >= CLEAR_COUNT_THRESHOLD) {
-                clearCount = 0;
-                // secret shortcut to reload page
-                window.location.reload();
-                return;
-              }
-              setTimeout(() => {
-                clearCount = 0;
-              }, 2000);
               onReset();
             }}
           >
