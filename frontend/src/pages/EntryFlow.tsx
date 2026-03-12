@@ -56,8 +56,8 @@ const EntryFlow: React.FC = () => {
       return;
     }
 
+    const repeat = getCarCount(carNumber) + 1;
     addLog(carNumber, line, undefined, note || undefined, origin?.stop_id ?? undefined, destination?.stop_id ?? undefined);
-    const repeat = getCarCount(carNumber);
     resetFlow();
     navigate("/history", { state: { fromNewEntry: true, repeat } });
   };
