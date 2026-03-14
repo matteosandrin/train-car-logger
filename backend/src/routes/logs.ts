@@ -143,18 +143,10 @@ router.patch("/logs/:id", requireAuth, async (req, res) => {
 router.get("/logs/station-pairs", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
   const line = typeof req.query.line === "string" ? req.query.line : null;
-  let limit = null;
-  try {
-    limit = parseInt(req.query.limit as string, 10);
-  } catch (error) {
-    limit = null;
-  }
-  let minCount = null;
-  try {
-    minCount = parseInt(req.query.min as string, 10);
-  } catch (error) {
-    minCount = null;
-  }
+  const limitRaw = parseInt(req.query.limit as string, 10);
+  const limit = isNaN(limitRaw) ? null : limitRaw;
+  const minRaw = parseInt(req.query.min as string, 10);
+  const minCount = isNaN(minRaw) ? null : minRaw;
 
   const conditions = [
     eq(carsTable.userId, userId),
