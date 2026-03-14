@@ -39,7 +39,7 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   >([]);
 
   useEffect(() => {
-    fetchStationPairs(line).then((pairs) => {
+    fetchStationPairs(line, 5).then((pairs) => {
       const resolved = pairs
         .map((p) => {
           const o = getStation(p.origin);

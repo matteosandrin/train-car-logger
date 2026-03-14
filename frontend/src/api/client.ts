@@ -47,8 +47,8 @@ export async function updateLogNotes(id: number, notes: string): Promise<void> {
   if (!res.ok) throw new Error("Failed to update notes");
 }
 
-export async function fetchStationPairs(line: string): Promise<StationPair[]> {
-  const res = await apiFetch(`/api/logs/station-pairs?line=${line.toString()}`);
+export async function fetchStationPairs(line: string, limit?: number): Promise<StationPair[]> {
+  const res = await apiFetch(`/api/logs/station-pairs?line=${line.toString()}${limit ? `&limit=${limit}` : ""}`);
   if (!res.ok) return [];
   const data = (await res.json()) as { pairs: StationPair[] };
   return data.pairs;

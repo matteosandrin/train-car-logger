@@ -143,6 +143,12 @@ router.patch("/logs/:id", requireAuth, async (req, res) => {
 router.get("/logs/station-pairs", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
   const line = typeof req.query.line === "string" ? req.query.line : null;
+  let limit = null;
+  try {
+    limit = parseInt(req.query.limit as string, 10);
+  } catch (error) {
+    limit = null;
+  }
 
   const conditions = [
     eq(carsTable.userId, userId),
@@ -151,7 +157,7 @@ router.get("/logs/station-pairs", requireAuth, async (req, res) => {
   ];
   if (line) conditions.push(eq(carsTable.line, line));
 
-  const rows = await db
+  const query = db
     .select({
       origin: carsTable.origin,
       destination: carsTable.destination,
@@ -160,9 +166,10 @@ router.get("/logs/station-pairs", requireAuth, async (req, res) => {
     .from(carsTable)
     .where(and(...conditions))
     .groupBy(carsTable.origin, carsTable.destination)
-    .orderBy(desc(sql`count(*)`))
-    .limit(5);
+    .orderBy(desc(sql`count(*)`));
+  if (limit) query.limit(limit);
 
+  const rows = await query.execute();
   res.json({ pairs: rows });
 });
 
