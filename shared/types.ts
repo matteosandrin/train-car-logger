@@ -7,3 +7,9 @@ export interface TrainLogEntry {
   origin?: string;
   destination?: string;
 }
+
+export interface StationPair {
+  origin: string;
+  destination: string;
+  count: number;
+}

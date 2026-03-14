@@ -140,6 +140,39 @@ router.patch("/logs/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
+router.get("/logs/station-pairs", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+  const line = typeof req.query.line === "string" ? req.query.line : null;
+  let limit = null;
+  try {
+    limit = parseInt(req.query.limit as string, 10);
+  } catch (error) {
+    limit = null;
+  }
+
+  const conditions = [
+    eq(carsTable.userId, userId),
+    isNotNull(carsTable.origin),
+    isNotNull(carsTable.destination),
+  ];
+  if (line) conditions.push(eq(carsTable.line, line));
+
+  const query = db
+    .select({
+      origin: carsTable.origin,
+      destination: carsTable.destination,
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(carsTable)
+    .where(and(...conditions))
+    .groupBy(carsTable.origin, carsTable.destination)
+    .orderBy(desc(sql`count(*)`));
+  if (limit) query.limit(limit);
+
+  const rows = await query.execute();
+  res.json({ pairs: rows });
+});
+
 router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   const queryUserId = req.user!.userId;
 
