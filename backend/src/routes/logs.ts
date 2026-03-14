@@ -149,6 +149,12 @@ router.get("/logs/station-pairs", requireAuth, async (req, res) => {
   } catch (error) {
     limit = null;
   }
+  let minCount = null;
+  try {
+    minCount = parseInt(req.query.min as string, 10);
+  } catch (error) {
+    minCount = null;
+  }
 
   const conditions = [
     eq(carsTable.userId, userId),
@@ -170,7 +176,7 @@ router.get("/logs/station-pairs", requireAuth, async (req, res) => {
   if (limit) query.limit(limit);
 
   const rows = await query.execute();
-  res.json({ pairs: rows });
+  res.json({ pairs: rows.filter((row) => row.count >= (minCount ?? 0)) });
 });
 
 router.get("/logs/shared-cars", requireAuth, async (req, res) => {
