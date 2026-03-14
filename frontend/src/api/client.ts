@@ -1,4 +1,4 @@
-import type { TrainLogEntry } from "@train-car-logger/shared";
+import type { TrainLogEntry, StationPair } from "@train-car-logger/shared";
 import { getToken } from "../auth/auth-service";
 import { API_URL } from "./config";
 
@@ -45,6 +45,13 @@ export async function updateLogNotes(id: number, notes: string): Promise<void> {
     body: JSON.stringify({ notes }),
   });
   if (!res.ok) throw new Error("Failed to update notes");
+}
+
+export async function fetchStationPairs(line: string): Promise<StationPair[]> {
+  const res = await apiFetch(`/api/logs/station-pairs?line=${line.toString()}`);
+  if (!res.ok) return [];
+  const data = (await res.json()) as { pairs: StationPair[] };
+  return data.pairs;
 }
 
 export async function postNotifications(entries: {friendUserId: number, loggedCarId: number}[]): Promise<{total: number}> {
