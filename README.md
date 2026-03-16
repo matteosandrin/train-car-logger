@@ -6,12 +6,6 @@ Single-page app for logging NYC subway train cars. It shows when you've been in
 the same subway car multiple times. Built with React and Typescript. Can be
 installed as a PWA on mobile.
 
-<table>
-    <td><img src="./screenshots/screenshot_01.png"/></td>
-    <td><img src="./screenshots/screenshot_02.png"/></td>
-    <td><img src="./screenshots/screenshot_03.png"/></td>
-</table>
-
 ## Local development
 
 - `npm install` to install dependencies
