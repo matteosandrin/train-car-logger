@@ -208,7 +208,7 @@ router.get("/logs/shared-cars", requireAuth, async (req, res) => {
   for (const row of rows) {
     const uid = row.sharedWithUserId!;
     if (!grouped[uid]) grouped[uid] = { id: uid, username: row.sharedWithUsername, cars: [] };
-    if (!grouped[uid].cars.some((c) => c.id === row.id)) {
+    if (!grouped[uid].cars.some((c) => c.car === row.car)) {
       grouped[uid].cars.push({ id: row.id, car: row.car, line: row.line, notified: row.notified });
     }
   }

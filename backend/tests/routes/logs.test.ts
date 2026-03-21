@@ -517,4 +517,35 @@ describe("GET /api/logs/shared-cars", () => {
 
     expect(res.body.friends).toHaveLength(0);
   });
+
+  it("deduplicates repeated shared car entries", async () => {
+    const alice = await createUser("alice");
+    const bob = await createUser("bob");
+
+    // Alice logs a car number twice
+    await request
+      .post("/api/logs")
+      .set("Authorization", authHeader(alice.token))
+      .send({ entries: [makeEntry({ car: "5555" })] });
+    await request
+      .post("/api/logs")
+      .set("Authorization", authHeader(alice.token))
+      .send({ entries: [makeEntry({ car: "5555" })] });
+    // Bob logs the same car number only once
+    await request
+      .post("/api/logs")
+      .set("Authorization", authHeader(bob.token))
+      .send({ entries: [makeEntry({ car: "5555" })] });
+
+    const res = await request
+      .get("/api/logs/shared-cars")
+      .set("Authorization", authHeader(alice.token));
+
+    expect(res.status).toBe(200);
+    expect(res.body.friends).toHaveLength(1);
+    expect(res.body.friends[0].username).toBe("bob");
+    expect(res.body.friends[0].cars).toHaveLength(1);
+    expect(res.body.friends[0].cars[0].car).toBe("5555");
+  });
+  
 });
