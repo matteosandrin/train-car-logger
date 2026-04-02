@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Button from "../ui/Button";
 import FlowContainer from "../ui/FlowContainer";
 import { assetUrl } from "../../assets";
 import { Station, getStation } from "../../utils/subway";
 import StationField from "./StationField";
-import { fetchStationPairs } from "../../api/client";
+import { getFrequentStationPairs } from "../../utils/stats";
+import { useLogsContext } from "../../storage";
 
 interface ConfirmationScreenProps {
   carNumber: string;
@@ -34,22 +35,17 @@ const ConfirmationScreen: React.FC<ConfirmationScreenProps> = ({
   onDestinationChange,
 }) => {
   const [openPicker, setOpenPicker] = useState<OpenPicker>(null);
-  const [commonPairs, setCommonPairs] = useState<
-    { origin: Station; destination: Station }[]
-  >([]);
+  const { logs } = useLogsContext();
 
-  useEffect(() => {
-    fetchStationPairs(line, /* limit */ 5, /* minCount */ 2).then((pairs) => {
-      const resolved = pairs
-        .map((p) => {
-          const o = getStation(p.origin);
-          const d = getStation(p.destination);
-          return o && d ? { origin: o, destination: d } : null;
-        })
-        .filter((p) => p !== null);
-      setCommonPairs(resolved);
-    });
-  }, [line]);
+  const commonPairs = useMemo(() => {
+    return getFrequentStationPairs(logs, line, /* limit */ 5, /* minCount */ 2)
+      .map((p) => {
+        const o = getStation(p.origin);
+        const d = getStation(p.destination);
+        return o && d ? { origin: o, destination: d, count: p.count } : null;
+      })
+      .filter((p) => p !== null);
+  }, [logs, line]);
 
   const handlePairSelect = (pair: { origin: Station; destination: Station }) => {
     onOriginChange(pair.origin);

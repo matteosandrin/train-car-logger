@@ -1,4 +1,4 @@
-import type { TrainLogEntry } from "@train-car-logger/shared";
+import type { TrainLogEntry, StationPair } from "@train-car-logger/shared";
 
 export interface LeaderboardEntry {
   car: string;
@@ -59,4 +59,30 @@ export function calculateTrainStats(logs: TrainLogEntry[]): TrainStats {
     repeatCars,
     leaderboard: leaderboardData,
   };
+}
+
+export function getFrequentStationPairs(
+  logs: TrainLogEntry[],
+  line: string,
+  limit?: number,
+  minCount?: number,
+): StationPair[] {
+  const counts = new Map<string, number>();
+
+  for (const entry of logs) {
+    if (entry.line !== line || !entry.origin || !entry.destination) continue;
+    const key = `${entry.origin}\0${entry.destination}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const pairs: StationPair[] = [];
+  for (const [key, count] of counts) {
+    if (minCount != null && count < minCount) continue;
+    const [origin, destination] = key.split("\0");
+    pairs.push({ origin, destination, count });
+  }
+
+  pairs.sort((a, b) => b.count - a.count);
+
+  return limit ? pairs.slice(0, limit) : pairs;
 }
