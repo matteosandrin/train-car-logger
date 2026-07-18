@@ -27,7 +27,24 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        // Precache only the shell so the SW activates in <1s
+        globPatterns: ["**/*.{js,css,html,webmanifest}", "img/icon.png"],
+        navigateFallback: "index.html",
+        cleanupOutdatedCaches: true,
+        // Line icons runtime cached on first use instead of blocking install.
+        runtimeCaching: [
+          {
+            urlPattern: /\/img\/.*\.svg$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "line-icons",
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 90,
+              },
+            },
+          },
+        ],
       },
     }),
   ],
