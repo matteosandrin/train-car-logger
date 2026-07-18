@@ -27,15 +27,11 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        // Precache only the app shell so the SW activates within ~1s and takes
-        // control immediately. Previously we precached all 30+ line SVGs, which
-        // delayed activation by ~10s and left relaunches falling back to GitHub
-        // Pages' 10-min HTTP cache (re-downloading the shell each launch on iOS).
+        // Precache only the shell so the SW activates in <1s
         globPatterns: ["**/*.{js,css,html,webmanifest}", "img/icon.png"],
         navigateFallback: "index.html",
         cleanupOutdatedCaches: true,
-        // Line icons are fetched by URL at runtime; cache-first keeps them local
-        // after first use without blocking install.
+        // Line icons runtime cached on first use instead of blocking install.
         runtimeCaching: [
           {
             urlPattern: /\/img\/.*\.svg$/,
