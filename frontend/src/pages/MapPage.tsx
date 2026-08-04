@@ -11,7 +11,7 @@ const MapPage: React.FC = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-white">
-      <div className="mx-auto w-full max-w-[440px] px-6 pb-2 pt-6">
+      <div className="mx-auto w-full max-w-[440px] px-6 pt-6 pb-4">
         <UserHeader title="Map" />
       </div>
 
@@ -19,13 +19,13 @@ const MapPage: React.FC = () => {
         <SubwayMap counts={counts} />
 
         {counts.size === 0 && (
-          <p className="pointer-events-none absolute inset-x-0 top-4 mx-auto max-w-[300px] text-center text-slate-600">
+          <p className="pointer-events-none absolute inset-x-0 top-16 mx-auto max-w-[300px] text-center text-slate-600">
             No trips with stations yet. Log a ride with an origin and
             destination to see it here!
           </p>
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-28 flex justify-center">
+        <div className="pointer-events-none absolute left-4 top-4">
           <div className="flex items-center gap-4 rounded-full border border-slate-200 bg-white/80 px-4 py-2 backdrop-blur-sm">
             {[...COUNT_BUCKETS].reverse().map((bucket) => (
               <div
