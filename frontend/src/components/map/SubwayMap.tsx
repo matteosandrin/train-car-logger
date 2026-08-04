@@ -1,8 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { GeoJSONSource, Map as LibreMap } from "maplibre-gl";
+import { GeoJSONSource, Map as LibreMap, setWorkerUrl } from "maplibre-gl";
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import segmentsData from "../../data/segments.json";
 import { segmentPairKey } from "../../utils/travel";
+
+// maplibre resolves its worker with a dynamic URL that the bundler
+// cannot see; give it the bundled worker URL instead
+setWorkerUrl(maplibreWorkerUrl);
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const SOURCE_ID = "subway-segments";
