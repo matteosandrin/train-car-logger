@@ -10,8 +10,6 @@ const OUT_PATH = path.join(process.cwd(), "src/data/segments.json");
 const API_BASE =
   "https://realtimerail.nyc/transiter/v0.6/systems/us-ny-subway/shapes";
 
-// meters per output unit
-const SCALE = 5;
 // max distance from a station to a shape for a valid match
 const MAX_SNAP_DIST = 300;
 // simplification tolerance in meters
@@ -163,6 +161,11 @@ async function main() {
     (lon - lon0) * cosLat * M_PER_DEG,
     (latMax - lat) * M_PER_DEG,
   ];
+  // meters back to [lon, lat] for GeoJSON output
+  const unproject = ([x, y]) => [
+    lon0 + x / (cosLat * M_PER_DEG),
+    latMax - y / M_PER_DEG,
+  ];
 
   // group projected shapes by route prefix ("1..N03R" -> "1")
   const shapesByRoute = new Map();
@@ -250,21 +253,23 @@ async function main() {
     }
   }
 
-  // scale to output units and round to integers
-  let width = 0;
-  let height = 0;
+  // convert to [lon, lat] rounded to ~1 m precision
+  const bbox = [Infinity, Infinity, -Infinity, -Infinity];
   const outSegments = [...segments.values()].map((seg) => {
-    const pts = seg.pts.map(([x, y]) => {
-      const xi = Math.round(x / SCALE);
-      const yi = Math.round(y / SCALE);
-      width = Math.max(width, xi);
-      height = Math.max(height, yi);
-      return [xi, yi];
+    const pts = seg.pts.map((p) => {
+      const [lon, lat] = unproject(p);
+      const rl = Math.round(lon * 1e5) / 1e5;
+      const rt = Math.round(lat * 1e5) / 1e5;
+      bbox[0] = Math.min(bbox[0], rl);
+      bbox[1] = Math.min(bbox[1], rt);
+      bbox[2] = Math.max(bbox[2], rl);
+      bbox[3] = Math.max(bbox[3], rt);
+      return [rl, rt];
     });
     return { from: seg.from, to: seg.to, routes: seg.routes, pts };
   });
 
-  const out = { bounds: { width, height }, segments: outSegments };
+  const out = { bbox, segments: outSegments };
   const json = JSON.stringify(out);
   if (json.length > MAX_OUT_BYTES) {
     throw new Error(

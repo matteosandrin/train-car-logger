@@ -1,7 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useRef } from "react";
+import { GeoJSONSource, Map as LibreMap } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import segmentsData from "../../data/segments.json";
 import { segmentPairKey } from "../../utils/travel";
-import { usePanZoom } from "./usePanZoom";
+
+const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+const SOURCE_ID = "subway-segments";
 
 export const COUNT_BUCKETS = [
   { min: 4, color: "#15803d", label: "4+ rides" },
@@ -9,75 +13,109 @@ export const COUNT_BUCKETS = [
   { min: 1, color: "#86efac", label: "1 ride" },
 ];
 
-const bucketColor = (count: number): string => {
-  for (const bucket of COUNT_BUCKETS) {
-    if (count >= bucket.min) return bucket.color;
-  }
-  return COUNT_BUCKETS[COUNT_BUCKETS.length - 1].color;
-};
+// width ramps keep lines readable across zoom levels
+const BASE_WIDTH = ["interpolate", ["linear"], ["zoom"], 9, 1, 13, 2.5, 16, 5];
+const TRAVELED_WIDTH = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  9,
+  2.5,
+  13,
+  5,
+  16,
+  10,
+];
 
-const toPathD = (pts: number[][]): string =>
-  `M${pts.map((p) => p.join(" ")).join(" L")}`;
+const buildGeoJSON = (counts: Map<string, number>): GeoJSON.GeoJSON => ({
+  type: "FeatureCollection",
+  features: segmentsData.segments.map((s) => ({
+    type: "Feature",
+    properties: { count: counts.get(segmentPairKey(s.from, s.to)) ?? 0 },
+    geometry: { type: "LineString", coordinates: s.pts },
+  })),
+});
 
 const SubwayMap: React.FC<{ counts: Map<string, number> }> = ({ counts }) => {
-  const { bounds, segments } = segmentsData;
-  const { svgRef, groupRef } = usePanZoom(bounds.width, bounds.height);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<LibreMap | null>(null);
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
 
-  // the whole grey network as one merged path
-  const basePath = useMemo(
-    () => segments.map((s) => toPathD(s.pts)).join(""),
-    [segments],
-  );
+  useEffect(() => {
+    const map = new LibreMap({
+      container: containerRef.current!,
+      style: STYLE_URL,
+      bounds: segmentsData.bbox as [number, number, number, number],
+      fitBoundsOptions: { padding: 24 },
+      attributionControl: { compact: true },
+    });
+    mapRef.current = map;
 
-  // traveled segments merged into one path per color bucket
-  const traveledPaths = useMemo(() => {
-    const byColor = new Map<string, string[]>();
-    for (const s of segments) {
-      const count = counts.get(segmentPairKey(s.from, s.to));
-      if (!count) continue;
-      const color = bucketColor(count);
-      if (!byColor.has(color)) byColor.set(color, []);
-      byColor.get(color)!.push(toPathD(s.pts));
-    }
-    return [...byColor.entries()].map(([color, ds]) => ({
-      color,
-      d: ds.join(""),
-    }));
-  }, [segments, counts]);
+    map.on("load", () => {
+      map.addSource(SOURCE_ID, {
+        type: "geojson",
+        data: buildGeoJSON(countsRef.current),
+      });
 
-  return (
-    <svg
-      ref={svgRef}
-      viewBox={`0 0 ${bounds.width} ${bounds.height}`}
-      className="h-full w-full touch-none select-none"
-      role="img"
-      aria-label="NYC subway map with traveled segments highlighted"
-    >
-      <g ref={groupRef}>
-        <path
-          d={basePath}
-          fill="none"
-          stroke="#cbd5e1"
-          strokeWidth={1.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-        {traveledPaths.map(({ color, d }) => (
-          <path
-            key={color}
-            d={d}
-            fill="none"
-            stroke={color}
-            strokeWidth={3.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
-      </g>
-    </svg>
-  );
+      // keep the basemap's labels above the subway lines
+      const firstSymbolLayer = map
+        .getStyle()
+        .layers.find((layer) => layer.type === "symbol")?.id;
+
+      map.addLayer(
+        {
+          id: "subway-base",
+          type: "line",
+          source: SOURCE_ID,
+          paint: {
+            "line-color": "#94a3b8",
+            "line-width": BASE_WIDTH as never,
+          },
+          layout: { "line-cap": "round", "line-join": "round" },
+        },
+        firstSymbolLayer,
+      );
+
+      map.addLayer(
+        {
+          id: "subway-traveled",
+          type: "line",
+          source: SOURCE_ID,
+          filter: [">", ["get", "count"], 0],
+          paint: {
+            "line-color": [
+              "step",
+              ["get", "count"],
+              COUNT_BUCKETS[2].color,
+              2,
+              COUNT_BUCKETS[1].color,
+              4,
+              COUNT_BUCKETS[0].color,
+            ] as never,
+            "line-width": TRAVELED_WIDTH as never,
+          },
+          layout: { "line-cap": "round", "line-join": "round" },
+        },
+        firstSymbolLayer,
+      );
+    });
+
+    return () => {
+      mapRef.current = null;
+      map.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const source = map.getSource<GeoJSONSource>(SOURCE_ID);
+    // before "load" fires, the load handler picks up counts via countsRef
+    source?.setData(buildGeoJSON(counts));
+  }, [counts]);
+
+  return <div ref={containerRef} className="h-full w-full" />;
 };
 
 export default SubwayMap;
