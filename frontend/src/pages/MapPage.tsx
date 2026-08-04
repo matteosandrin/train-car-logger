@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useLogsContext } from "../storage";
 import { UserHeader } from "../components/ui/UserHeader";
-import SubwayMap, { COUNT_BUCKETS } from "../components/map/SubwayMap";
+import SubwayMap from "../components/map/SubwayMap";
 import { getTraveledSegmentCounts } from "../utils/travel";
 
 const MapPage: React.FC = () => {
@@ -24,23 +24,6 @@ const MapPage: React.FC = () => {
             destination to see it here!
           </p>
         )}
-
-        <div className="pointer-events-none absolute left-4 top-4">
-          <div className="flex items-center gap-4 rounded-full border border-slate-200 bg-white/80 px-4 py-2 backdrop-blur-sm">
-            {[...COUNT_BUCKETS].reverse().map((bucket) => (
-              <div
-                key={bucket.label}
-                className="flex items-center gap-1.5 text-xs text-slate-600"
-              >
-                <span
-                  className="inline-block h-1.5 w-4 rounded-full"
-                  style={{ backgroundColor: bucket.color }}
-                />
-                {bucket.label}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
