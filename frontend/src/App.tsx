@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import EntryFlow from "./pages/EntryFlow";
 import FriendsPage from "./pages/FriendsPage";
@@ -9,11 +9,15 @@ import TaskBar from "./components/ui/TaskBar";
 
 import { useLocation } from "react-router-dom";
 
+// lazy so the map geometry stays off the critical path
+const MapPage = React.lazy(() => import("./pages/MapPage"));
+
 const App: React.FC = () => {
   const location = useLocation();
   const showTaskBar =
     location.pathname === "/" ||
     location.pathname === "/history" ||
+    location.pathname === "/map" ||
     location.pathname === "/friends";
 
   return (
@@ -22,6 +26,14 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<EntryFlow />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route
+            path="/map"
+            element={
+              <Suspense fallback={null}>
+                <MapPage />
+              </Suspense>
+            }
+          />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
