@@ -7,7 +7,7 @@ import { segmentPairKey } from "../../utils/travel";
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const SOURCE_ID = "subway-segments";
 
-export const COUNT_BUCKETS = [
+const COUNT_BUCKETS = [
   { min: 4, color: "#15803d", label: "4+ rides" },
   { min: 2, color: "#22c55e", label: "2-3 rides" },
   { min: 1, color: "#86efac", label: "1 ride" },
@@ -46,9 +46,9 @@ const SubwayMap: React.FC<{ counts: Map<string, number> }> = ({ counts }) => {
     const map = new LibreMap({
       container: containerRef.current!,
       style: STYLE_URL,
-      bounds: segmentsData.bbox as [number, number, number, number],
-      fitBoundsOptions: { padding: 24 },
-      attributionControl: { compact: true },
+      center: [-73.984016, 40.757342],
+      zoom: 11,
+      attributionControl: false,
     });
     mapRef.current = map;
 
