@@ -14,8 +14,6 @@ const API_BASE =
 const MAX_SNAP_DIST = 300;
 // simplification tolerance in meters
 const DP_TOLERANCE = 5;
-// hard cap on output size
-const MAX_OUT_BYTES = 300 * 1024;
 
 const M_PER_DEG = 111320;
 
@@ -271,11 +269,6 @@ async function main() {
 
   const out = { bbox, segments: outSegments };
   const json = JSON.stringify(out);
-  if (json.length > MAX_OUT_BYTES) {
-    throw new Error(
-      `segments.json is ${json.length} bytes (> ${MAX_OUT_BYTES}); raise DP_TOLERANCE`,
-    );
-  }
   fs.writeFileSync(OUT_PATH, json + "\n");
   console.log(
     `Done! ${outSegments.length} segments, ${fallbacks} skipped pairs, ` +
