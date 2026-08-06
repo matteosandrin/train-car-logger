@@ -4,26 +4,40 @@ import { useAuthContext } from "../auth/use-auth-context";
 import Button from "../components/ui/Button";
 import { getLastSyncTime } from "../storage/local-storage";
 import { getQueueSize } from "../storage/sync-service";
-import { version } from "../../package.json";
+import { useAppVersion } from "../utils/use-app-version";
 
 function formatLastSync(ts: number | null): string {
   if (ts === null) return "Never";
   return new Date(ts).toLocaleString();
 }
 
+const VERSION_STATUS_TEXT: Record<string, string> = {
+  idle: "",
+  checking: "Checking for updates...",
+  latest: "You have the latest version",
+  outdated: "A new version is available",
+  unavailable: "Cannot check right now",
+};
+
 const AccountPage: React.FC = () => {
   const { user, logout } = useAuthContext();
   const navigate = useNavigate();
 
+  const appVersion = useAppVersion();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [queueSize, setQueueSize] = useState(getQueueSize);
-  const [lastSync, setLastSync] = useState<number | null>(() => getLastSyncTime());
+  const [lastSync, setLastSync] = useState<number | null>(() =>
+    getLastSyncTime(),
+  );
+
+  const checkVersion = appVersion.check;
 
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       setQueueSize(getQueueSize());
       setLastSync(getLastSyncTime());
+      checkVersion();
     };
     const handleOffline = () => setIsOnline(false);
     window.addEventListener("online", handleOnline);
@@ -32,7 +46,7 @@ const AccountPage: React.FC = () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []);
+  }, [checkVersion]);
 
   const handleSignOut = () => {
     logout();
@@ -68,23 +82,67 @@ const AccountPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Pending items</span>
           <span className="text-sm font-medium text-gray-900">
-            {queueSize > 0 && <span className="inline-block w-2 h-2 rounded-full bg-orange-400" />}
-            {" "}
+            {queueSize > 0 && (
+              <span className="inline-block w-2 h-2 rounded-full bg-orange-400" />
+            )}{" "}
             {queueSize}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Last sync</span>
-          <span className="text-sm font-medium text-gray-900 font-mono">{formatLastSync(lastSync)}</span>
+          <span className="text-sm font-medium text-gray-900 font-mono">
+            {formatLastSync(lastSync)}
+          </span>
         </div>
       </div>
+      <div className="rounded-2xl bg-white ring-1 ring-gray-200 px-5 py-4 flex flex-col gap-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          App version
+        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Installed</span>
+          <span className="text-sm font-medium text-gray-900 font-mono">
+            v{appVersion.version} ({appVersion.buildId})
+          </span>
+        </div>
+        {appVersion.status === "outdated" && appVersion.deployed && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">Available</span>
+            <span className="text-sm font-medium text-gray-900 font-mono">
+              v{appVersion.deployed.version} ({appVersion.deployed.buildId})
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between gap-3">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+            {appVersion.status === "outdated" && (
+              <span className="inline-block w-2 h-2 rounded-full bg-orange-400" />
+            )}
+            {VERSION_STATUS_TEXT[appVersion.status]}
+          </span>
+          {appVersion.status !== "checking" && (
+            <button
+              type="button"
+              className="text-sm font-medium text-gray-500 underline"
+              onClick={appVersion.check}
+            >
+              Check again
+            </button>
+          )}
+        </div>
+        {appVersion.status === "outdated" && (
+          <Button variant="primary" onClick={appVersion.update}>
+            Update now
+          </Button>
+        )}
+      </div>
+
       <Button variant="secondary" onClick={handleSignOut}>
         Sign out
       </Button>
       <Button variant="secondary" onClick={() => window.location.reload()}>
         Refresh app
       </Button>
-      <p className="text-center text-sm text-gray-400">v{version}</p>
     </div>
   );
 };
