@@ -41,82 +41,97 @@ const buildGeoJSON = (counts: Map<string, number>): GeoJSON.GeoJSON => ({
   })),
 });
 
+// the map lives in a detached div that outlives the React tree, so leaving
+// and re-entering the map tab keeps the tiles, camera and GL context
+let mapHolder: HTMLDivElement | null = null;
+let mapInstance: LibreMap | null = null;
+let latestCounts: Map<string, number> = new Map();
+
+const createMap = (): LibreMap => {
+  const holder = document.createElement("div");
+  holder.style.width = "100%";
+  holder.style.height = "100%";
+  mapHolder = holder;
+
+  const map = new LibreMap({
+    container: holder,
+    style: STYLE_URL,
+    center: [-73.984016, 40.757342],
+    zoom: 11,
+    attributionControl: false,
+  });
+  mapInstance = map;
+
+  map.on("load", () => {
+    map.addSource(SOURCE_ID, {
+      type: "geojson",
+      data: buildGeoJSON(latestCounts),
+    });
+
+    // keep the basemap's labels above the subway lines
+    const firstSymbolLayer = map
+      .getStyle()
+      .layers.find((layer) => layer.type === "symbol")?.id;
+
+    map.addLayer(
+      {
+        id: "subway-base",
+        type: "line",
+        source: SOURCE_ID,
+        paint: {
+          "line-color": "#94a3b8",
+          "line-width": BASE_WIDTH as never,
+        },
+        layout: { "line-cap": "round", "line-join": "round" },
+      },
+      firstSymbolLayer,
+    );
+
+    map.addLayer(
+      {
+        id: "subway-traveled",
+        type: "line",
+        source: SOURCE_ID,
+        filter: [">", ["get", "count"], 0],
+        paint: {
+          "line-color": [
+            "step",
+            ["get", "count"],
+            COUNT_BUCKETS[2].color,
+            2,
+            COUNT_BUCKETS[1].color,
+            4,
+            COUNT_BUCKETS[0].color,
+          ] as never,
+          "line-width": TRAVELED_WIDTH as never,
+        },
+        layout: { "line-cap": "round", "line-join": "round" },
+      },
+      firstSymbolLayer,
+    );
+  });
+
+  return map;
+};
+
 const SubwayMap: React.FC<{ counts: Map<string, number> }> = ({ counts }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<LibreMap | null>(null);
-  const countsRef = useRef(counts);
-  countsRef.current = counts;
+  latestCounts = counts;
 
   useEffect(() => {
-    const map = new LibreMap({
-      container: containerRef.current!,
-      style: STYLE_URL,
-      center: [-73.984016, 40.757342],
-      zoom: 11,
-      attributionControl: false,
-    });
-    mapRef.current = map;
-
-    map.on("load", () => {
-      map.addSource(SOURCE_ID, {
-        type: "geojson",
-        data: buildGeoJSON(countsRef.current),
-      });
-
-      // keep the basemap's labels above the subway lines
-      const firstSymbolLayer = map
-        .getStyle()
-        .layers.find((layer) => layer.type === "symbol")?.id;
-
-      map.addLayer(
-        {
-          id: "subway-base",
-          type: "line",
-          source: SOURCE_ID,
-          paint: {
-            "line-color": "#94a3b8",
-            "line-width": BASE_WIDTH as never,
-          },
-          layout: { "line-cap": "round", "line-join": "round" },
-        },
-        firstSymbolLayer,
-      );
-
-      map.addLayer(
-        {
-          id: "subway-traveled",
-          type: "line",
-          source: SOURCE_ID,
-          filter: [">", ["get", "count"], 0],
-          paint: {
-            "line-color": [
-              "step",
-              ["get", "count"],
-              COUNT_BUCKETS[2].color,
-              2,
-              COUNT_BUCKETS[1].color,
-              4,
-              COUNT_BUCKETS[0].color,
-            ] as never,
-            "line-width": TRAVELED_WIDTH as never,
-          },
-          layout: { "line-cap": "round", "line-join": "round" },
-        },
-        firstSymbolLayer,
-      );
-    });
+    const map = mapInstance ?? createMap();
+    containerRef.current!.appendChild(mapHolder!);
+    // the holder had no size while detached; re-measure it
+    map.resize();
 
     return () => {
-      mapRef.current = null;
-      map.remove();
+      mapHolder?.remove();
     };
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const source = map.getSource<GeoJSONSource>(SOURCE_ID);
-    // before "load" fires, the load handler picks up counts via countsRef
+    // before "load" fires, the load handler picks up counts via latestCounts
+    const source = mapInstance?.getSource<GeoJSONSource>(SOURCE_ID);
     source?.setData(buildGeoJSON(counts));
   }, [counts]);
 
